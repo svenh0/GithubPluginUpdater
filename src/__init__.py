@@ -12,3 +12,5 @@ config.plugins.githubpluginupdater.popups_timeout 			= ConfigSelectionNumber(0, 
 config.plugins.githubpluginupdater.backup 							= ConfigYesNo(default = False)
 config.plugins.githubpluginupdater.backup_path 					= ConfigDirectory(default = "/media/hdd/backup/")
 config.plugins.githubpluginupdater.show_warninginfo 		= ConfigYesNo(default = True)
+config.plugins.githubpluginupdater.show_updatequestion	= ConfigSelection(choices=[("False",_("no")), ("True",_("yes"))], default = "False")
+config.plugins.githubpluginupdater.updatequestion_defaultanswer	= ConfigSelection(choices=[("False",_("no")), ("True",_("yes"))], default = "False")

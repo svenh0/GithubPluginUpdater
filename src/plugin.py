@@ -11,9 +11,9 @@ from GithubPluginUpdater import githuburls, search_strings, filenames, pluginnam
 import GithubPluginUpdater
 import AutoUpdateCheck
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 
-gpu_session = None
+session = None
 getPageCounter = 0
 getContentCounter = 0
 local_version = []
@@ -26,15 +26,13 @@ for counter, pl in enumerate(pluginnames):
 	config.plugins.githubpluginupdater.update_check[pl] = ConfigYesNo(default = True)
 
 def leaveStandby():
-	
+	global session
 	try:
 		print "=====[GithubPluginUpdater] aus standby aufgewacht ..."
-		#AddPopup("GithubPluginUpdater beim Aufwachen aus Standby gestartet",MessageBox.TYPE_INFO,15,'GPU_PopUp_START')
-		
 		if config.plugins.githubpluginupdater.enable_autocheck.value != "False":
 			reload(AutoUpdateCheck)
 			from AutoUpdateCheck import loadPages as checkupdate
-			checkupdate()
+			checkupdate(session)
 
 	except:
 		import traceback
@@ -49,35 +47,32 @@ def standbyCounterChanged(configElement):
 
 
 def sessionstart(reason, **kwargs):
-	global gpu_session
+	global session
 	if kwargs.has_key("session") and reason == 0:
-		gpu_session = kwargs["session"]
-		print "=====[GithubPluginUpdater] sessionstart...."
+		session = kwargs["session"]
+		print "=====[GithubPluginUpdater] sessionstart....", session
 		#== add to set function at restart from standby
 		config.misc.standbyCounter.addNotifier(standbyCounterChanged, initial_call = False)
 		
-		#config.plugins.githubpluginupdater.lastcommit = ConfigSubDict()
-		#config.plugins.githubpluginupdater.update_check = ConfigSubDict()
-		
-		#for counter, pl in enumerate(pluginnames):
-			#config.plugins.githubpluginupdater.lastcommit[pl] = ConfigText(default=lastgithubcommits[counter])
-			#config.plugins.githubpluginupdater.update_check[pl] = ConfigYesNo(default = True)
-			#print "==== value: ", config.plugins.githubpluginupdater.lastcommit[pl].value, pl
-
-def autostart(reason, **kwargs):
-
-	print "=====[GithubPluginUpdater] autostart - reason: ", reason
-	if reason == 0:
+		print "=====[GithubPluginUpdater] runUpdateCheck in sessionstart ...."
 		if config.plugins.githubpluginupdater.enable_autocheck.value != "False":
-		
-			#config.plugins.githubpluginupdater.update_check = ConfigSubDict()
-			#for counter, pl in enumerate(pluginnames):
-			#	config.plugins.githubpluginupdater.update_check[pl] = ConfigYesNo(default = True)
-			
-			print "=====[GithubPluginUpdater] runUpdateCheck...."
 			reload(AutoUpdateCheck)
 			from AutoUpdateCheck import loadPages as checkupdate
-			checkupdate()
+			checkupdate(session)
+	else:
+		print "=====[GithubPluginUpdater] sessionstart ohne session...."
+		pass
+
+def autostart(reason, **kwargs):
+	global session
+	
+	print "=====[GithubPluginUpdater] autostart - reason: ", reason
+	if kwargs.has_key("session") and reason == 0:
+		session = kwargs["session"]
+		print "=====[GithubPluginUpdater] autostart mit session..."
+	else:
+		print "=====[GithubPluginUpdater] autostart ohne session..."
+		pass
 
 def main(session, **kwargs):
 
@@ -86,6 +81,10 @@ def main(session, **kwargs):
 		from GithubPluginUpdater import UpdateScreen
 		session.open(UpdateScreen)
 
+#	reload(AutoUpdateCheck)
+#	try:
+#		from AutoUpdateCheck import loadPages as checkupdate
+#		checkupdate(session)
 
 	except:
 		import traceback
@@ -96,6 +95,6 @@ def Plugins(**kwargs):
 	descriptors = []
 	descriptors.append( PluginDescriptor(name =_("GithubPluginUpdater"), description=_("github-Versionen updaten")+ " (" + VERSION + ")", where = PluginDescriptor.WHERE_SESSIONSTART, fnc=sessionstart) )
 	descriptors.append( PluginDescriptor(name =_("GithubPluginUpdater"), description=_("github-Versionen updaten")+ " (" + VERSION + ")", where=[ PluginDescriptor.WHERE_EXTENSIONSMENU, PluginDescriptor.WHERE_PLUGINMENU ], fnc = main, needsRestart = False, icon = "GithubPluginUpdater.png") )
-	descriptors.append( PluginDescriptor(where = PluginDescriptor.WHERE_AUTOSTART, needsRestart = True, fnc = autostart) )
+	#descriptors.append( PluginDescriptor(where = PluginDescriptor.WHERE_AUTOSTART, needsRestart = True, fnc = autostart) )
 
 	return descriptors

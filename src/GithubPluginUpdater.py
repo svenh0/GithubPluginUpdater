@@ -747,3 +747,35 @@ class UpdateScreen(Screen):
 			
 			return cmd
 
+
+class UpdateInfo(Screen):
+	
+	skin = """ <screen position="90,90" size="0,0" title="Update Info"></screen>"""
+
+	def __init__(self, session, UpdatePluginnames=""):
+		Screen.__init__(self, session)
+		
+		self.session = session
+		self.UpdatePluginnames = UpdatePluginnames
+		self.firsttime = True
+		self.onShown.append(self.showmsg)
+		self.onLayoutFinish.append( self.LayoutFinish )
+
+	def LayoutFinish(self):
+		
+		self.setTitle("GithubPluginUpdater - Updateinfo")
+
+	def showmsg(self):
+		
+		if self.firsttime:
+			self.firsttime = False
+			default_answer = False
+			if config.plugins.githubpluginupdater.updatequestion_defaultanswer.value == "True":
+				default_answer = True
+			self.session.openWithCallback(self.openGPU, MessageBox, "\n = GithubPluginUpdater = \n\n  >>> es liegen für folgende Plugins Updates vor !!! <<<\n  " + self.UpdatePluginnames + "\n\n\nSoll der GithubPluginUpdater geöffnet werden?", MessageBox.TYPE_YESNO, timeout = int(config.plugins.githubpluginupdater.popups_timeout.value), default = default_answer)
+	
+	def openGPU(self, confirm):
+		
+		if confirm:
+			self.session.open(UpdateScreen)
+		self.close()

@@ -115,6 +115,11 @@ class GithubPluginUpdaterSetup(Screen, ConfigListScreen):
 		if config.plugins.githubpluginupdater.enable_autocheck.value != "False":
 			self.list.append( getConfigListEntry(_("   Anzeigedauer für Update-Info-Fenster (in Sek)"), config.plugins.githubpluginupdater.popups_timeout, _("Legt fest, nach wieviel Sekunden das Update-Info-Fenster automatisch geschlossen wird (1-20 Sek., 0 = wartet auf Tastendruck)")) )
 			
+			self.list.append( getConfigListEntry(_("   erweiterte Update-Info mit Frage zum Öffnen des Plugins"), config.plugins.githubpluginupdater.show_updatequestion, _("Zeigt beim Update-Hinweis zusätzlich eine Frage, ob man den GithubPluginUpdater direkt direkt öffnen möchte.")) )
+			
+			if config.plugins.githubpluginupdater.show_updatequestion.value == "True":
+				self.list.append( getConfigListEntry(_("       Antwort für Frage steht standardmäßig auf:"), config.plugins.githubpluginupdater.updatequestion_defaultanswer, _("Legt fest, welche Antwort für die Frage zum Öffnen des GithubPluginUpdaters standardmäßig vorausgewählt sein soll. Bei 'nein' öffnet sich das Plugin bei Zeitablauf der Frage nicht automatisch.")) )
+			
 			from GithubPluginUpdater import pluginnames, filenames
 			for counter, pl in enumerate(pluginnames):
 				if os.path.isfile(filenames[counter]):
@@ -169,7 +174,7 @@ class GithubPluginUpdaterSetup(Screen, ConfigListScreen):
 		for x in self.onChangedEntry:
 			x()
 		current = self["config"].getCurrent()[1]
-		if (current == config.plugins.githubpluginupdater.backup) or (current == config.plugins.githubpluginupdater.enable_autocheck):
+		if (current == config.plugins.githubpluginupdater.backup) or (current == config.plugins.githubpluginupdater.enable_autocheck) or (current == config.plugins.githubpluginupdater.show_updatequestion):
 			self.changeConfig()
 			return
 

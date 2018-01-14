@@ -3,25 +3,32 @@
 from Components.config import config
 from Tools.Notifications import AddPopup
 from Screens.MessageBox import MessageBox
+from Screens.Screen import Screen
 
 from socket import timeout
 from twisted.web.client import getPage
+from Tools.BoundFunction import boundFunction
 
 from GithubPluginUpdater import test, githuburls, pluginnames, lastgithubcommits, githubcommiturls, search_strings, filenames
 
+import GithubPluginUpdater
 import os
 
-gpu_session = None
+session = None
 getPageCounter = 0
 getContentCounter = 0
 UpdateExist = False
+UpdatePluginnames = ""
 
 
-def loadPages():
+def loadPages(gpu_session):
 			
 			global githuburls
 			global githubcommiturls
 			global getPageCounter
+			global session
+			
+			session = gpu_session
 			
 			getContentCounter = 0
 			getPageCounter = 0
@@ -35,25 +42,16 @@ def loadPages():
 					getPageCounter +=1
 					deferred = getPage(githubcommiturls[i], timeout=10)
 					deferred.addCallback(getLastCommit, i+1)
-					print "======== GithubPluginAutoUpdater addCallback ==============================", i+1
 					deferred.addErrback(errorHandler, i+1)
 
 def errorHandler(result, number):
 			
 			global getContentCounter
 			global getPageCounter
-			global UpdateExist
 			
 			getContentCounter += 1
-			#getContentWithError = True
-			#print "== GithubPluginUpdater getContentError: ", number, result
 			if getContentCounter == getPageCounter:
-				if UpdateExist:
-					if config.plugins.githubpluginupdater.enable_autocheck.value != "False":
-						AddPopup("\n = GithubPluginUpdater = \n\n  >>> es liegen neue Plugin-Updates vor !!! <<<\n\n  zum Update den GithubPluginUpdater öffnen", MessageBox.TYPE_ERROR, int(config.plugins.githubpluginupdater.popups_timeout.value),'GPU_PopUp_ERROR')
-				else:
-					if config.plugins.githubpluginupdater.enable_autocheck.value == "True":
-						AddPopup("\n = GithubPluginUpdater = \n\n  keine Plugin-Updates gefunden", MessageBox.TYPE_ERROR, int(config.plugins.githubpluginupdater.popups_timeout.value),'GPU_PopUp_ERROR')
+				getUpdateInfoMessage(MessageBox.TYPE_ERROR)
 
 
 def getLastCommit(contents, number):
@@ -64,7 +62,9 @@ def getLastCommit(contents, number):
 				global getPageCounter
 				global UpdateExist
 				global lastgithubcommits
-
+				global session
+				global UpdatePluginnames
+			
 				getContentCounter += 1
 				
 				#== nur wenn Plugin installiert ist ===
@@ -82,20 +82,33 @@ def getLastCommit(contents, number):
 						last_commit = str(contents[pos1+25:pos1+25+19])
 
 					if last_local_commit < last_commit:
-						#print "== [GithubPluginUpdater] Update gefunden"
 						UpdateExist = True
+						UpdatePluginnames += "\n    - " + pluginnames[number-1]
 
 				if getContentCounter == getPageCounter:
-					if UpdateExist:
-						if config.plugins.githubpluginupdater.enable_autocheck.value != "False":
-							AddPopup("\n = GithubPluginUpdater = \n\n  >>> es liegen neue Plugin-Updates vor !!! <<<\n\n  zum Update den GithubPluginUpdater öffnen",MessageBox.TYPE_INFO , int(config.plugins.githubpluginupdater.popups_timeout.value),'GPU_PopUp_Update')
-					else:
-						if config.plugins.githubpluginupdater.enable_autocheck.value == "True":
-							AddPopup("\n = GithubPluginUpdater = \n\n  keine Plugin-Updates gefunden",MessageBox.TYPE_INFO, int(config.plugins.githubpluginupdater.popups_timeout.value),'GPU_PopUp_Update')
+					getUpdateInfoMessage(MessageBox.TYPE_INFO)
 
 			except:
 				import traceback
 				traceback.print_exc()
 
 
- 
+def getUpdateInfoMessage(MessageBoxType = MessageBox.TYPE_INFO):
+
+					global UpdateExist
+					global session
+					global UpdatePluginnames
+					
+					if UpdateExist:
+						if config.plugins.githubpluginupdater.enable_autocheck.value != "False":
+							if config.plugins.githubpluginupdater.show_updatequestion.value == "False":
+								AddPopup("\n = GithubPluginUpdater = \n\n  >>> es liegen für folgende Plugins Updates vor !!! <<<\n  " + UpdatePluginnames + "\n\n\n  zum Update den GithubPluginUpdater öffnen",MessageBoxType , int(config.plugins.githubpluginupdater.popups_timeout.value),'GPU_PopUp_Update')
+							else:
+								reload(GithubPluginUpdater)
+								from GithubPluginUpdater import UpdateInfo
+								print "========= update exist - open Updatescreen ==============="
+								session.open(UpdateInfo, UpdatePluginnames)
+					else:
+						if config.plugins.githubpluginupdater.enable_autocheck.value == "True":
+							AddPopup("\n = GithubPluginUpdater = \n\n  keine Plugin-Updates gefunden",MessageBoxType, int(config.plugins.githubpluginupdater.popups_timeout.value),'GPU_PopUp_Update')
+					
