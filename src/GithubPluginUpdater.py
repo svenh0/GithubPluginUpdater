@@ -37,11 +37,14 @@ pluginnames = ['SerienRecorder',
 							'InfoBarTunerState',
 							'EnhancedMovieCenter']
 
-#default for load config-values
+#default commit_date for load config-values
 lastgithubcommits = [ '', '', '', '']
 
-#to save the last read commits from github
+#to save the last commit_date from github
 last_commit   = ["", "", "", ""]
+
+#to load the last commit-infotext from github
+last_commit_info   = ["", "", "", ""]
 
 pluginsfolder = ['serienrecorder',
 								 'SeriesPlugin',
@@ -86,7 +89,7 @@ class UpdateScreen(Screen):
 	if sz_w == 1920:
 		skin = """
 		<screen name="GithubPluginUpdater" position="center,center" size="1200,680">
-			<widget name="myLabel" position="15,10" size="1100,50" font="Regular;32"/>
+			<widget name="myLabel" position="15,10" size="1100,80" font="Regular;24"/>
 			<eLabel text="Menü" position="1080,20" size="90,30" backgroundColor="#777777" halign="center" font="Regular;24"/>
 
 			<eLabel text="(lokale Version)" position="440,80" size="300,50" font="Regular;32" foregroundColor="#FFFF00"/>
@@ -126,7 +129,7 @@ class UpdateScreen(Screen):
 	else:
 		skin = """
 		<screen name="GithubPluginUpdater" position="center,center" size="930,520">
-			<widget name="myLabel" position="15,20" size="700,30" font="Regular;24"/>
+			<widget name="myLabel" position="15,20" size="700,50" font="Regular;18"/>
 			<eLabel text="Menü" position="850,20" size="70,20" backgroundColor="#777777" halign="center" font="Regular;18"/>
 
 			<eLabel text="(lokale Version)" position="320,80" size="200,30" font="Regular;24" foregroundColor="#FFFF00"/>
@@ -164,7 +167,6 @@ class UpdateScreen(Screen):
 			<widget name="status_txt" position="110,450" size="790,30" font="Regular;24"/>
 		</screen>"""
 
-
 	
 	def __init__(self, session, args = 0):
 		self.session = session
@@ -200,7 +202,11 @@ class UpdateScreen(Screen):
 						"yellow": boundFunction(self.runUpdateScript, 3),
 						"blue"  : boundFunction(self.runUpdateScript, 4),
 						"info"  : self.keyOK,
-						"menu"  : self.menu
+						"menu"  : self.menu,
+						"1"     : boundFunction(self.showCommitInfo, 1),
+						"2"     : boundFunction(self.showCommitInfo, 2),
+						"3"     : boundFunction(self.showCommitInfo, 3),
+						"4"     : boundFunction(self.showCommitInfo, 4)
 				},-1)
 			
 			self.reloadGitVersion = True
@@ -222,7 +228,7 @@ class UpdateScreen(Screen):
 	def LayoutFinish(self):
 			
 			self.setTitle("GithubPluginUpdater - " + PluginVersion)
-			self["myLabel"].setText(_("zum Neuladen der github-Versionen 'OK' drücken "))
+			self["myLabel"].setText(_("zum Neuladen der github-Versionen 'OK' drücken\nTasten 1-4 zur Anzeige der letzten Github-Update-Info"))
 
 	def setup(self):
 			
@@ -243,31 +249,81 @@ class UpdateScreen(Screen):
 			self.updateExist = False
 			self.loadPages()
 
+	def showCommitInfo(self, number):
+			
+			global filenames
+			global last_commit_info
+			global last_commit #commitdate
+			
+			if os.path.isfile(filenames[number-1]):
+				if len(last_commit_info[number-1]):
+					updateinfo = last_commit_info[number-1]
+					if len(last_commit[number-1]):
+						updateinfo = "github-Datum: " + last_commit[number-1] + "\n\n" + updateinfo
+					self.session.open(MessageBox, _("letzte Update-Info für " + pluginnames[number-1] + ":\n" + str(updateinfo)), MessageBox.TYPE_INFO)
+				else:
+					self.session.open(MessageBox, _("Es konnte keine Updateinfo für " + pluginnames[number-1] + " gefunden werden."), MessageBox.TYPE_INFO)
+
+	def getLastCommitInfo(self, contents):
+
+			updateinfo = ""
+			pos1 = contents.find('class="commit-author')
+			if pos1 > 0:
+				pos2 = contents.find('class="message" data-pjax="true" title="',pos1+len('class="commit-author') )
+				if pos2 > 0:
+					pos3 = contents.find('">',pos2+len('class="message" data-pjax="true" title="') )
+					updateinfo = str(contents[pos2+len('class="message" data-pjax="true" title="'):pos3])
+			
+			return updateinfo
+
+	def runUpdateScriptCallbackFirst(self, ret):
+		
+		if ret:
+			number = self.UpdateNumber
+			local_version = self["myplugin" + str(number) + "_lokal_version"].getText()
+			git_version = self["myplugin" + str(number) + "_git_version"].getText()
+			if not local_version:
+					return
+			
+			#global filenames
+			#global last_commit_info
+			#global last_commit #commitdate
+		
+			updateinfo=""
+			if os.path.isfile(filenames[number-1]):
+				if len(last_commit_info[number-1]):
+					updateinfo = last_commit_info[number-1]
+					if len(last_commit[number-1]):
+						updateinfo = "Version: " + git_version + " (" + last_commit[number-1] +")\n\n" + updateinfo
+			self.session.openWithCallback(self.runUpdateScriptCallback, MessageBox, "Update-Info für " + pluginnames[number-1] + ":\n" + str(updateinfo) + "\n\nSoll das github-Update jetzt gestartet werden?", MessageBox.TYPE_YESNO, default = True)
+
+
 	def runUpdateScript(self, number, force_install = False):
+
+			#if ret:
+			self.UpdateNumber = number
+			self.force_install = force_install
+			
+			local_version = self["myplugin" + str(number) + "_lokal_version"].getText()
+			git_version = self["myplugin" + str(number) + "_git_version"].getText()
 		
-		self.UpdateNumber  = number
-		self.force_install = force_install
+			if not local_version:
+				return
 		
-		local_version = self["myplugin" + str(number) + "_lokal_version"].getText()
-		git_version = self["myplugin" + str(number) + "_git_version"].getText()
+			if test:
+				last_github_commit = lastgithubcommits[number-1]
+			else:
+				last_github_commit = last_commit[number-1]
 		
-		if not local_version:
-			return
+			if not self.force_install and (config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value >= last_github_commit):
+				print "=== [GithubPluginUpdater] runScript Number with no update: ", number, last_github_commit, config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value
+				#print "=== return ===="
+				return
 		
-		if test:
-			last_github_commit = lastgithubcommits[number-1]
-		else:
-			last_github_commit = last_commit[number-1]
-		
-		if not force_install and (config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value >= last_github_commit):
-			print "=== [GithubPluginUpdater] runScript Number with no update: ", number, last_github_commit, config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value
-			#print "=== return ===="
-			return
-		
-		if config.plugins.githubpluginupdater.show_warninginfo.value:
-			self.session.openWithCallback(self.runUpdateScriptCallback, MessageBox, "Warnhinweis:\n\nPlugin-Versionen im github sind oft noch Test-Versionen und können gewisse Probleme nach der Installation verursachen!\n\nDaher sollten nur erfahrene User ein solches Update auf eine github-Version durchführen.\n\nSoll das github-Update jetzt gestartet werden?", MessageBox.TYPE_YESNO, default = False)
-		else:
-			self.runUpdateScriptCallback(True)
+			if config.plugins.githubpluginupdater.show_warninginfo.value:
+				self.session.openWithCallback(self.runUpdateScriptCallbackFirst, MessageBox, "Warnhinweis:\n\nPlugin-Versionen im github sind oft noch Test-Versionen und können gewisse Probleme nach der Installation verursachen!\n\nDaher sollten nur erfahrene User ein solches Update auf eine github-Version durchführen.\n\nSoll das github-Update jetzt gestartet werden?", MessageBox.TYPE_YESNO, default = False)
+			else:
+				self.runUpdateScriptCallbackFirst(True)
 
 
 	def runUpdateScriptCallback(self, ret):
@@ -406,13 +462,25 @@ class UpdateScreen(Screen):
 				global pluginnames
 				global lastgithubcommits
 				global last_commit
+				global last_commit_info
 				
 				self.getContentCounter += 1
 				search_string = "<relative-time datetime="
 				
 				pos1 = contents.find(search_string)
 				if pos1 > 0:
+					print "===== not found relative-time ==", pluginnames[number-1]
 					last_commit[number-1] = str(contents[pos1+25:pos1+25+19])
+				else:
+					print "===== not found relative-time ==", pluginnames[number-1]
+					search_string = "<time-ago datetime=", pluginnames[number-1]
+					pos1 = contents.find(search_string)
+					if pos1 > 0:
+						print "===== found time-ago ==" 
+						last_commit[number-1] = str(contents[pos1+20:pos1+20+19])
+				
+				#set last commit-info-text
+				last_commit_info[number-1] = self.getLastCommitInfo(contents)
 				
 				if test:
 					last_local_commit = lastgithubcommits[number-1]
