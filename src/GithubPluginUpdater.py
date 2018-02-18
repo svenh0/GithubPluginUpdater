@@ -1,90 +1,118 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from Screens.Console import Console
-from Tools.Notifications import AddPopup
-from Screens.MessageBox import MessageBox
-from Screens.ChoiceBox import ChoiceBox
+# Config
 from Components.config import *
 
+# Screen
 from Screens.Screen import Screen
-from Components.Label import Label
+from Screens.Console import Console
+from Screens.MessageBox import MessageBox
+from Screens.ChoiceBox import ChoiceBox
+from Screens.HelpMenu import HelpableScreen
 from skin import parseColor
-from Components.ActionMap import ActionMap
+
+from Components.Label import Label
+from Components.ScrollLabel import ScrollLabel
+from Components.Sources.StaticText import StaticText
+from Components.ActionMap import ActionMap, HelpableActionMap
 from pprint import pprint
 
 # GUI (System) 
-from enigma import eTimer, ePoint, eSize, getDesktop
-
+from enigma import eTimer, ePoint, eSize, getDesktop, ePoint
 
 from socket import timeout
 from twisted.web.client import getPage
 
+from Tools.Notifications import AddPopup
 from Tools.BoundFunction import boundFunction
+from Tools.Directories import fileExists, resolveFilename, SCOPE_PLUGINS
 
 import Screens.Standby
-import os
+import os, sys, traceback
 import subprocess
 import time
 import GithubPluginUpdater_Setup
 
 PluginVersion = ""
 counter = 0
-test = False
+reload_value = False
 
 pluginnames = ['SerienRecorder',
 							'SeriesPlugin',
 							'InfoBarTunerState',
-							'EnhancedMovieCenter']
+							'EnhancedMovieCenter',
+							'GithubPluginUpdater']
 
 #default commit_date for load config-values
-lastgithubcommits = [ '', '', '', '']
+lastgithubcommits = [ '', '', '', '', '']
 
 #to save the last commit_date from github
-last_commit   = ["", "", "", ""]
+last_commit   = ["", "", "", "", ""]
 
 #to load the last commit-infotext from github
-last_commit_info   = ["", "", "", ""]
+last_commit_info   = ["", "", "", "", ""]
+
+#to load the local version of the plugins
+local_versions = ["", "", "", "", ""]
 
 pluginsfolder = ['serienrecorder',
 								 'SeriesPlugin',
 								 'InfoBarTunerState',
-								 'EnhancedMovieCenter']
+								 'EnhancedMovieCenter',
+								 'GithubPluginUpdater']
 
 filenames = [ '/usr/lib/enigma2/python/Plugins/Extensions/serienrecorder/SerienRecorderHelpers.py',
 							'/usr/lib/enigma2/python/Plugins/Extensions/SeriesPlugin/plugin.py',
 							'/usr/lib/enigma2/python/Plugins/Extensions/InfoBarTunerState/plugin.py',
-							'/usr/lib/enigma2/python/Plugins/Extensions/EnhancedMovieCenter/EnhancedMovieCenter.py']
+							'/usr/lib/enigma2/python/Plugins/Extensions/EnhancedMovieCenter/EnhancedMovieCenter.py',
+							'/usr/lib/enigma2/python/Plugins/Extensions/GithubPluginUpdater/plugin.py']
 
-githuburls = [ 'https://github.com/einfall/serienrecorder/raw/master/src/SerienRecorderHelpers.py',
-							 'https://github.com/betonme/e2openplugin-SeriesPlugin/raw/master/src/plugin.py',
-							 'https://github.com/betonme/e2openplugin-InfoBarTunerState/raw/master/src/plugin.py',
-							 'https://github.com/betonme/e2openplugin-EnhancedMovieCenter/raw/master/src/EnhancedMovieCenter.py']
+githuburls = [ 'https://raw.githubusercontent.com/einfall/serienrecorder/master/src/SerienRecorderHelpers.py',
+							 'https://raw.githubusercontent.com/betonme/e2openplugin-SeriesPlugin/master/src/plugin.py',
+							 'https://raw.githubusercontent.com/betonme/e2openplugin-InfoBarTunerState/master/src/plugin.py',
+							 'https://raw.githubusercontent.com/betonme/e2openplugin-EnhancedMovieCenter/master/src/EnhancedMovieCenter.py',
+							 'https://raw.githubusercontent.com/svenh0/GithubPluginUpdater/master/src/plugin.py']
 
 githubcommiturls = [ 'https://github.com/einfall/serienrecorder',
 							 'https://github.com/betonme/e2openplugin-SeriesPlugin',
 							 'https://github.com/betonme/e2openplugin-InfoBarTunerState',
-							 'https://github.com/betonme/e2openplugin-EnhancedMovieCenter']
+							 'https://github.com/betonme/e2openplugin-EnhancedMovieCenter',
+							 'https://github.com/svenh0/GithubPluginUpdater']
+
+githubcommitlisturls = [ 'einfall/serienrecorder',
+							 'betonme/e2openplugin-SeriesPlugin',
+							 'betonme/e2openplugin-InfoBarTunerState',
+							 'betonme/e2openplugin-EnhancedMovieCenter',
+							 'svenh0/GithubPluginUpdater']
 
 gitzipurls = [ 'https://github.com/einfall/serienrecorder/archive/master.zip',
 							 'https://github.com/betonme/e2openplugin-SeriesPlugin/archive/master.zip',
 							 'https://github.com/betonme/e2openplugin-InfoBarTunerState/archive/master.zip',
-							 'https://github.com/betonme/e2openplugin-EnhancedMovieCenter/archive/master.zip']
+							 'https://github.com/betonme/e2openplugin-EnhancedMovieCenter/archive/master.zip',
+							 'https://github.com/svenh0/GithubPluginUpdater/archive/master.zip']
 
 gitzip_folder = [ 'serienrecorder-master',
 									'e2openplugin-SeriesPlugin-master',
 									'e2openplugin-InfoBarTunerState-master',
-									'e2openplugin-EnhancedMovieCenter-master']
+									'e2openplugin-EnhancedMovieCenter-master',
+									'GithubPluginUpdater-master']
 
 search_strings = [ 'SRVERSION = ',
 									 'VERSION = ',
 									 'VERSION = ',
-									 'EMCVersion = ']
+									 'EMCVersion = ',
+									 'VERSION = ']
+
+color_strings = [ 'red',
+									 'green',
+									 'yellow',
+									 'blue']
 
 sz_w = getDesktop(0).size().width()
 
 ########################################################################### 
-class UpdateScreen(Screen):
+class UpdateScreen(Screen, HelpableScreen):
 	
 	if sz_w == 1920:
 		skin = """
@@ -171,6 +199,7 @@ class UpdateScreen(Screen):
 	def __init__(self, session, args = 0):
 		self.session = session
 		Screen.__init__(self, session)
+		HelpableScreen.__init__(self)
 		
 		try:
 			self["myLabel"] = Label("")
@@ -179,10 +208,9 @@ class UpdateScreen(Screen):
 			PluginVersion = VERSION
 			self.skinName = "GithubPluginUpdater"
 			
-			global pluginnames
+			global pluginnames, filenames, color_strings
 
-			for i in range(len(pluginnames)):
-				#print(i,pluginnames[i])
+			for i in range(len(pluginnames)-1):
 				self["myplugin" + str(i+1) + "_name"] = Label(pluginnames[i])
 				self["myplugin" + str(i+1) + "_lokal_version"] = Label("...")
 				self["myplugin" + str(i+1) + "_lokal_date"] = Label("(...)")
@@ -190,24 +218,76 @@ class UpdateScreen(Screen):
 				self["myplugin" + str(i+1) + "_git_date"] = Label("")
 				self["myplugin" + str(i+1) + "_update"] = Label(" Update")
 				self["myplugin" + str(i+1) + "_update"].hide()
-
+			
 			self["status_txt"] = Label("lokale Versionen wurden geladen")
 			
-			self["myActionMap"] = ActionMap(["EPGSelectActions", "SetupActions", "ColorActions", "MenuActions"],
+			self["myActionMap"] = ActionMap(["GithubPluginUpdaterActions"],
 				{
-						"ok"    : self.keyOK,
-						"cancel": self.cancel,
-						"red"   : boundFunction(self.runUpdateScript, 1),
-						"green" : boundFunction(self.runUpdateScript, 2),
-						"yellow": boundFunction(self.runUpdateScript, 3),
-						"blue"  : boundFunction(self.runUpdateScript, 4),
-						"info"  : self.keyOK,
-						"menu"  : self.menu,
-						"1"     : boundFunction(self.showCommitInfo, 1),
-						"2"     : boundFunction(self.showCommitInfo, 2),
-						"3"     : boundFunction(self.showCommitInfo, 3),
-						"4"     : boundFunction(self.showCommitInfo, 4)
+						"ok"    		 : self.keyOK,
+						"cancel"		 : self.cancel,
+						"info"  		 : self.checkSelfUpdate,
+						"info_lang"	 : boundFunction(self.showExtCommitInfo, 5),
+						"menu"  		 : self.menu
 				},-1)
+			
+			if os.path.isfile(filenames[0]):
+				self["myActionMap1"] = ActionMap(["GithubPluginUpdaterActions"],
+					{
+						"red"   		 : boundFunction(self.runUpdateScript, 1),
+						"red_long"   : boundFunction(self.runUpdateScript, 1, True),
+						"1"    			 : boundFunction(self.showCommitInfo, 1),
+						"1_long"		 : boundFunction(self.showExtCommitInfo, 1)
+					},-1)
+			
+			if os.path.isfile(filenames[1]):
+				self["myActionMap2"] = ActionMap(["GithubPluginUpdaterActions"],
+					{
+						"green" 		 : boundFunction(self.runUpdateScript, 2),
+						"green_long" : boundFunction(self.runUpdateScript, 2, True),
+						"2"     		 : boundFunction(self.showCommitInfo, 2),
+						"2_long"		 : boundFunction(self.showExtCommitInfo, 2)
+					},-1)
+			
+			if os.path.isfile(filenames[2]):
+				self["myActionMap3"] = ActionMap(["GithubPluginUpdaterActions"],
+					{
+						"yellow"		 : boundFunction(self.runUpdateScript, 3),
+						"yellow_long": boundFunction(self.runUpdateScript, 3, True),
+						"3"     		 : boundFunction(self.showCommitInfo, 3),
+						"3_long"		 : boundFunction(self.showExtCommitInfo, 3)
+					},-1)
+			
+			if os.path.isfile(filenames[3]):
+				self["myActionMap4"] = ActionMap(["GithubPluginUpdaterActions"],
+					{
+						"blue"  		 : boundFunction(self.runUpdateScript, 4),
+						"blue_long"  : boundFunction(self.runUpdateScript, 4, True),
+						"4"     		 : boundFunction(self.showCommitInfo, 4),
+						"4_long"		 : boundFunction(self.showExtCommitInfo, 4)
+					},-1)
+			
+			# add helpstrings to helpscreen
+			self.helpList.append((self["myActionMap"], "GithubPluginUpdaterActions", [("ok", _("Neuladen der github-Daten"))]))
+			self.helpList.append((self["myActionMap"], "GithubPluginUpdaterActions", [("cancel", _("Plugin beenden"))]))
+			self.helpList.append((self["myActionMap"], "GithubPluginUpdaterActions", [("menu", _("Plugin-Menü öffnen"))]))
+			self.helpList.append((self["myActionMap"], "GithubPluginUpdaterActions", [("info", _("Updateprüfung für GithubPluginUpdater"))]))
+			self.helpList.append((self["myActionMap"], "GithubPluginUpdaterActions", [("info_lang", _("erweiterte Update-Info für GithubPluginUpdater"))]))
+			
+			for i in range(4):
+				if os.path.isfile(filenames[i]):
+					self.helpList.append((self["myActionMap"], "GithubPluginUpdaterActions", [(color_strings[i], _("Update für ")+pluginnames[i])]))
+			
+			for i in range(4):
+				if os.path.isfile(filenames[i]):
+					self.helpList.append((self["myActionMap"], "GithubPluginUpdaterActions", [(color_strings[i] + "_long", _("Zwangs-Update für ")+pluginnames[i])]))
+			
+			for i in range(4):
+				if os.path.isfile(filenames[i]):
+					self.helpList.append((self["myActionMap"], "GithubPluginUpdaterActions", [(str(i+1), _("Update-Info für ")+pluginnames[i])]))
+			
+			for i in range(4):
+				if os.path.isfile(filenames[i]):
+					self.helpList.append((self["myActionMap"], "GithubPluginUpdaterActions", [(str(i+1)+"_long", _("erweiterte Update-Info für ")+pluginnames[i])]))
 			
 			self.reloadGitVersion = True
 			self.reloadLocalVersion = True
@@ -217,6 +297,7 @@ class UpdateScreen(Screen):
 			self.getContentCounter = 0
 			self.getCommitCounter = 0
 			self.getContentWithError = False
+			self.showUpdateMsgBox = False
 			self.onShown.append(self.loadPages)
 			self.onLayoutFinish.append( self.LayoutFinish )
 
@@ -232,7 +313,8 @@ class UpdateScreen(Screen):
 
 	def setup(self):
 			
-			reload(GithubPluginUpdater_Setup)
+			if reload_value:
+				reload(GithubPluginUpdater_Setup)
 			try:
 				from GithubPluginUpdater_Setup import GithubPluginUpdaterSetup
 				self.session.open(GithubPluginUpdaterSetup)
@@ -240,6 +322,89 @@ class UpdateScreen(Screen):
 			except:
 				import traceback
 				traceback.print_exc()
+				
+
+	def getGPUVersion(self, contents):
+			
+			global PluginVersion
+			global last_commit_info
+			global last_commit #commitdate
+			
+			gpu_version=""
+			search_string = "VERSION = "
+			pos1 = contents.find(search_string)
+			if pos1 > 0:
+				pos2 = contents.find("\n",pos1+len(search_string))
+				gpu_version = str(contents[pos1:pos2])
+				gpu_version = gpu_version.replace(search_string,"")
+				gpu_version = gpu_version.replace('"',"")
+			
+			local_version = PluginVersion
+			#local_version = "1.1.0"
+			gpu_version_split = gpu_version.split(".")
+			gpu_version_split = map(lambda x: int(x), gpu_version_split)
+			if " beta" in local_version:
+				local_version_split = local_version.split(" ")[0].split(".")
+				local_version_split = map(lambda x: int(x), local_version_split)
+				#set higher Version at beta
+				local_version_split.append(0)
+				gpu_version_split.append(1)
+			else:
+				local_version_split = local_version.split(".")
+				local_version_split = map(lambda x: int(x), local_version_split)
+
+			message_txt  = "Updateprüfung für GithubPluginUpdater:\n"
+			
+			if self.gpu_force_install or (gpu_version_split > local_version_split): 
+				message_txt += "github Version: " + gpu_version + " (" + last_commit[4] + ")\n"
+				last_commit_info_txt = last_commit_info[4].split("\n")
+				if len(last_commit_info_txt)>3:
+					last_commit_info_txt = "\n".join(last_commit_info_txt[:3])
+					last_commit_info_txt += "\n... weitere Infos in der erweiterten Updatinfo ..."
+				else:
+					last_commit_info_txt = "\n".join(last_commit_info_txt)
+				if self.gpu_force_install == False:
+					message_txt += "\nEs existiert eine neuere Version!\n" 
+				message_txt += "\n" + last_commit_info_txt + "\n\nSoll das Update jetzt gestartet werden?\n"
+				self.UpdateNumber = 5 
+				self.session.openWithCallback(self.runUpdateScriptCallback, MessageBox, message_txt, MessageBox.TYPE_YESNO, default = True)
+
+			else:
+				message_txt += "\ngithub Version: " + gpu_version + " (" + last_commit[4] + ")\n"
+				message_txt += "lokale Version:  " + local_version + "\n\n"
+				message_txt += "Es wird bereits die aktuellste Version genutzt!                        \n "
+				if self.showUpdateMsgBox == False:
+					self.session.open(MessageBox, message_txt, MessageBox.TYPE_INFO)
+				else:
+					self.session.open(MessageBox, message_txt, MessageBox.TYPE_INFO)
+					self.msg.close()
+					self.msg = None
+
+	def getGPUVersionErrorHandler(self, result):
+			
+			if self.showUpdateMsgBox == False:
+				self.session.open(MessageBox, _("\nFehler bei der Updateprüfung"), MessageBox.TYPE_INFO)
+			else:
+				self.msg["text"].setText(_("\nFehler bei der Updateprüfung") + "\n")
+
+	def checkSelfUpdate(self, force_install = False):
+			
+			global githuburls
+			
+			self.msg = self.session.open(MessageBox, _("Updateprüfung für GithubPluginUpdater\n\n\nlade Daten ..."), MessageBox.TYPE_INFO)
+			# set status for messagebox onClose
+			self.msg.onClose.append(self.UpdateMsgBoxState)
+			self.showUpdateMsgBox = True
+			self.gpu_force_install = force_install
+			
+			url = githuburls[4]
+			self.deferred = getPage(url, timeout=7)
+			self.deferred.addCallback(self.getGPUVersion)
+			self.deferred.addErrback(self.getGPUVersionErrorHandler)
+
+
+	def UpdateMsgBoxState(self):
+		self.showUpdateMsgBox = False
 
 
 	def keyOK(self):
@@ -248,6 +413,15 @@ class UpdateScreen(Screen):
 			self.reloadLocalVersion = True
 			self.updateExist = False
 			self.loadPages()
+
+	def showExtCommitInfo(self, number):
+			
+			global pluginnames
+			global filenames
+			
+			pluginname = pluginnames[number-1]
+			if number == 5 or os.path.isfile(filenames[number-1]):
+				self.session.open(showUpdateInfo, pluginname, _("GithubPluginUpdater"), "erweiterte github-Update-Infos für " + pluginname + ":\n\n","\nfür weitere Update-Infos bitte die github-Website besuchen.\n", number)
 
 	def showCommitInfo(self, number):
 			
@@ -284,10 +458,6 @@ class UpdateScreen(Screen):
 			git_version = self["myplugin" + str(number) + "_git_version"].getText()
 			if not local_version:
 					return
-			
-			#global filenames
-			#global last_commit_info
-			#global last_commit #commitdate
 		
 			updateinfo=""
 			if os.path.isfile(filenames[number-1]):
@@ -297,44 +467,36 @@ class UpdateScreen(Screen):
 						updateinfo = "Version: " + git_version + " (" + last_commit[number-1] +")\n\n" + updateinfo
 			self.session.openWithCallback(self.runUpdateScriptCallback, MessageBox, "Update-Info für " + pluginnames[number-1] + ":\n" + str(updateinfo) + "\n\nSoll das github-Update jetzt gestartet werden?", MessageBox.TYPE_YESNO, default = True)
 
-
 	def runUpdateScript(self, number, force_install = False):
-
-			#if ret:
-			self.UpdateNumber = number
-			self.force_install = force_install
-			
-			local_version = self["myplugin" + str(number) + "_lokal_version"].getText()
-			git_version = self["myplugin" + str(number) + "_git_version"].getText()
 		
-			if not local_version:
-				return
+		self.UpdateNumber = number
+		self.force_install = force_install
 		
-			if test:
-				last_github_commit = lastgithubcommits[number-1]
-			else:
-				last_github_commit = last_commit[number-1]
+		local_version = self["myplugin" + str(number) + "_lokal_version"].getText()
+		git_version = self["myplugin" + str(number) + "_git_version"].getText()
 		
-			if not self.force_install and (config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value >= last_github_commit):
-				print "=== [GithubPluginUpdater] runScript Number with no update: ", number, last_github_commit, config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value
-				#print "=== return ===="
-				return
+		if not local_version:
+			return
 		
-			if config.plugins.githubpluginupdater.show_warninginfo.value:
-				self.session.openWithCallback(self.runUpdateScriptCallbackFirst, MessageBox, "Warnhinweis:\n\nPlugin-Versionen im github sind oft noch Test-Versionen und können gewisse Probleme nach der Installation verursachen!\n\nDaher sollten nur erfahrene User ein solches Update auf eine github-Version durchführen.\n\nSoll das github-Update jetzt gestartet werden?", MessageBox.TYPE_YESNO, default = False)
-			else:
-				self.runUpdateScriptCallbackFirst(True)
+		last_github_commit = last_commit[number-1]
+		
+		if not self.force_install and (config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value >= last_github_commit):
+			print "=== [GithubPluginUpdater] runScript Number with no update: ", number, last_github_commit, config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value
+			return
+		
+		if config.plugins.githubpluginupdater.show_warninginfo.value:
+			self.session.openWithCallback(self.runUpdateScriptCallbackFirst, MessageBox, "Warnhinweis:\n\nPlugin-Versionen im github sind oft noch Test-Versionen und können gewisse Probleme nach der Installation verursachen!\n\nDaher sollten nur erfahrene User ein solches Update auf eine github-Version durchführen.\n\nSoll das github-Update jetzt gestartet werden?", MessageBox.TYPE_YESNO, default = False)
+		else:
+			self.runUpdateScriptCallbackFirst(True)
 
 
 	def runUpdateScriptCallback(self, ret):
-
+		
+		number = self.UpdateNumber
 		if ret:
 			global last_commit
 			global pluginnames
 			global lastgithubcommits
-
-			number = self.UpdateNumber
-			force_install = self.force_install
 
 			check_curl = subprocess.check_output("opkg list-installed curl", shell=True)
 			print "=== cmd-output curl ===: ", check_curl
@@ -349,28 +511,38 @@ class UpdateScreen(Screen):
 
 			try:
 				global PluginVersion
-			
-				#print "[GithubPluginUpdater] Start Plugin - Version: ", PluginVersion
-			
+				
 				#set backup_path ======================
 				self.backuplocation = self.getBackupLocation()
-			
-				self.reloadGitVersion = True
-				self.reloadLocalVersion = True
+				
+				if number != 5:
+					self.reloadGitVersion = True
+					self.reloadLocalVersion = True
 				self.updateExist = False
 				self.runUpdate = True
-
+				
 				cmd = self.getConsoleCmd(number)
+				print "=======\n", cmd
 				self.session.open(Console,_("GithubPluginUpdater") + " (" + PluginVersion + ")",[cmd])
+				
+				if number != 5:
+					config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value = last_commit[number-1]
+					config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].save()
+					config.plugins.githubpluginupdater.save()
+				else:
+					if self.showUpdateMsgBox:
+						#print "=== opend box ==="
+						self.msg.close()
+						self.msg = None
 			
-				config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value = last_commit[number-1]
-				config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].save()
-				config.plugins.githubpluginupdater.save()
-		
 			except:
 				import traceback
 				traceback.print_exc()
-
+			
+		else:
+			if number == 5 and self.showUpdateMsgBox:
+				self.msg.close()
+				self.msg = None
 
 	def getBackupLocation(self):
 			
@@ -387,7 +559,7 @@ class UpdateScreen(Screen):
 
 	def loadPages(self):
 			
-			if 			self.reloadGitVersion == False:
+			if self.reloadGitVersion == False:
 				return
 			
 			global githuburls
@@ -400,7 +572,7 @@ class UpdateScreen(Screen):
 			for i in range(len(githuburls)):
 				if self.reloadLocalVersion == True:
 					self.getLocalVersion(pluginnames[i],i+1)
-				if self["myplugin" + str(i+1) + "_lokal_version"].getText():
+				if i == 4 or self["myplugin" + str(i+1) + "_lokal_version"].getText():
 					self.getPage(githuburls[i], i+1)
 			
 			self.reloadGitVersion = False
@@ -413,16 +585,19 @@ class UpdateScreen(Screen):
 
 			self.getPageCounter += 2
 			
-			self["myplugin" + str(number) + "_git_version"].instance.setForegroundColor(parseColor("foreground"))
-			self["myplugin" + str(number) + "_lokal_version"].instance.setForegroundColor(parseColor("foreground"))
-			self["myplugin" + str(number) + "_name"].instance.setForegroundColor(parseColor("foreground"))
-			self["myplugin" + str(number) + "_git_version"].setText("...")
-			self["myplugin" + str(number) + "_git_date"].setText("(...)")
-			self["myplugin" + str(number) + "_update"].hide()
-			deferred = getPage(url, timeout=5)
-			deferred.addCallback(self.getWebContent, number)
-			deferred.addErrback(self.errorHandler, number)
+			if number < 4:
+				self["myplugin" + str(number) + "_git_version"].instance.setForegroundColor(parseColor("foreground"))
+				self["myplugin" + str(number) + "_lokal_version"].instance.setForegroundColor(parseColor("foreground"))
+				self["myplugin" + str(number) + "_name"].instance.setForegroundColor(parseColor("foreground"))
+				self["myplugin" + str(number) + "_git_version"].setText("...")
+				self["myplugin" + str(number) + "_git_date"].setText("(...)")
+				self["myplugin" + str(number) + "_update"].hide()
+			
+			self.deferred = getPage(url, timeout=5)
+			self.deferred.addCallback(self.getWebContent, number)
+			self.deferred.addErrback(self.errorHandler, number)
 
+			#https://api.github.com/repos/..USER../..PLUGIN../git/refs/heads/master - getLastCommitUrl
 			url = githubcommiturls[number-1]
 			self.deferred = getPage(url, timeout=5)
 			self.deferred.addCallback(self.getLastCommit, number)
@@ -450,7 +625,8 @@ class UpdateScreen(Screen):
 				git_version = git_version.replace("'","")
 				git_version = git_version.replace('"',"")
 				#set github version in the screen
-				self["myplugin" + str(number) + "_git_version"].setText(git_version)
+				if number !=5:
+					self["myplugin" + str(number) + "_git_version"].setText(git_version)
 
 			self.checkIfLastPage()
 
@@ -469,42 +645,40 @@ class UpdateScreen(Screen):
 				
 				pos1 = contents.find(search_string)
 				if pos1 > 0:
-					print "===== not found relative-time ==", pluginnames[number-1]
+					#print "===== found relative-time ==", pluginnames[number-1]
 					last_commit[number-1] = str(contents[pos1+25:pos1+25+19])
 				else:
-					print "===== not found relative-time ==", pluginnames[number-1]
+					#print "===== not found relative-time ==", pluginnames[number-1]
 					search_string = "<time-ago datetime=", pluginnames[number-1]
 					pos1 = contents.find(search_string)
 					if pos1 > 0:
-						print "===== found time-ago ==" 
+						#print "===== found time-ago ==" 
 						last_commit[number-1] = str(contents[pos1+20:pos1+20+19])
 				
 				#set last commit-info-text
 				last_commit_info[number-1] = self.getLastCommitInfo(contents)
 				
-				if test:
-					last_local_commit = lastgithubcommits[number-1]
-				else:
-					last_local_commit = config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value
+				last_local_commit = config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value
 				
 				#print "===== local_Commit, last_commit: ", last_local_commit, last_commit[number-1], pluginnames[number-1]
 				
-				local_version = self["myplugin" + str(number) + "_lokal_version"].getText()
+				if number !=5:
+					local_version = self["myplugin" + str(number) + "_lokal_version"].getText()
 
-				if len(local_version) and (last_local_commit < last_commit[number-1]):
-					self["myplugin" + str(number) + "_git_version"].instance.setForegroundColor(parseColor("red"))
-					self["myplugin" + str(number) + "_name"].instance.setForegroundColor(parseColor("red"))
-					self["myplugin" + str(number) + "_update"].show()
-					self.updateExist = True
-					print "===== new commit === local_Commit, last_commit: ", last_local_commit, last_commit[number-1], pluginnames[number-1]
-				else:
-					self["myplugin" + str(number) + "_git_version"].instance.setForegroundColor(parseColor("foreground"))
-					self["myplugin" + str(number) + "_lokal_version"].instance.setForegroundColor(parseColor("green"))
-					self["myplugin" + str(number) + "_name"].instance.setForegroundColor(parseColor("foreground"))
-					self["myplugin" + str(number) + "_update"].hide()
-
-				self["myplugin" + str(number) + "_git_date"].setText(last_commit[number-1])
-
+					if len(local_version) and (last_local_commit < last_commit[number-1]):
+						self["myplugin" + str(number) + "_git_version"].instance.setForegroundColor(parseColor("red"))
+						self["myplugin" + str(number) + "_name"].instance.setForegroundColor(parseColor("red"))
+						self["myplugin" + str(number) + "_update"].show()
+						self.updateExist = True
+						print "===== new commit === local_Commit, last_commit: ", last_local_commit, last_commit[number-1], pluginnames[number-1]
+					else:
+						self["myplugin" + str(number) + "_git_version"].instance.setForegroundColor(parseColor("foreground"))
+						self["myplugin" + str(number) + "_lokal_version"].instance.setForegroundColor(parseColor("green"))
+						self["myplugin" + str(number) + "_name"].instance.setForegroundColor(parseColor("foreground"))
+						self["myplugin" + str(number) + "_update"].hide()
+					
+					self["myplugin" + str(number) + "_git_date"].setText(last_commit[number-1])
+				
 				self.checkIfLastPage()
 
 			except:
@@ -525,7 +699,7 @@ class UpdateScreen(Screen):
 				self.getPageCounter = 0
 				self.getContentWithError = False
 				
-				for i in range(len(pluginnames)):
+				for i in range(4):
 					if self["myplugin" + str(i+1) + "_lokal_version"].getText() and not config.plugins.githubpluginupdater.lastcommit[pluginnames[i]].value:
 						self.session.open(MessageBox, 'Es existieren nicht für alle Plugins lokale github-Datumswerte, die zum Versionsvergleich genutzt werden.\nDaher werden diese Plugins automatisch als Update angeboten. Es gibt folgende Möglichkeiten erstmals ein lokales github-Datum zu speichern:\n\n1. wenn alle Plugins auf der Box tatsächlich aktuell sind, dann kann per Menü-Taste die Option "setze für alle Plugins das aktuelle github-Datum" gewählt werden\n\noder\n\n2. die jeweiligen Plugins können per Farb-Taste aktualisiert werden.\n\nDanach sollten alle Plugins als aktuell angezeigt werden.', MessageBox.TYPE_INFO)
 						break
@@ -538,6 +712,11 @@ class UpdateScreen(Screen):
 			local_label_name = "myplugin" + str(number) + "_lokal_version"
 			
 			local_version = self.readLocalVersion(number)
+			local_versions[number-1] = local_version
+			
+			if number == 5:
+				return
+			
 			self[local_label_name].setText(local_version)
 			self[local_label_name].show()
 			
@@ -545,10 +724,7 @@ class UpdateScreen(Screen):
 			if not len(local_version):
 				self[local_label_name].setText("")
 			else:
-				if test:
-					last_local_commit = lastgithubcommits[number-1]
-				else:
-					last_local_commit = config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value
+				last_local_commit = config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value
 				self[local_label_name].setText(last_local_commit)
 
 		except:
@@ -591,8 +767,8 @@ class UpdateScreen(Screen):
 		list.append((_("Setup"), "setup"))
 		
 		list.append(("--", ""))
-		
-		for i in range(len(pluginnames)):
+		list.append((_("Erzwinge Update für " + pluginnames[4]), "force_update_4"))
+		for i in range(len(pluginnames)-1):
 			if os.path.isfile(filenames[i]):
 				list.append((_("Erzwinge Update für " + pluginnames[i]), "force_update_" + str(i)))
 		
@@ -632,14 +808,16 @@ class UpdateScreen(Screen):
 				self.runUpdateScript(3, True)
 			elif ret == "force_update_3":
 				self.runUpdateScript(4, True)
+			elif ret == "force_update_4":
+				self.checkSelfUpdate(True)
 			elif ret == "resetallgitdate":
-				for i in range(len(pluginnames)):
+				for i in range(4):
 					config.plugins.githubpluginupdater.lastcommit[pluginnames[i]].value = ""
 					config.plugins.githubpluginupdater.lastcommit[pluginnames[i]].save()
 				config.plugins.githubpluginupdater.save()
 				self.keyOK()
 			elif ret == "setallgitdate":
-				for i in range(len(pluginnames)):
+				for i in range(4):
 					config.plugins.githubpluginupdater.lastcommit[pluginnames[i]].value = last_commit[i]
 					config.plugins.githubpluginupdater.lastcommit[pluginnames[i]].save()
 				config.plugins.githubpluginupdater.save()
@@ -652,9 +830,10 @@ class UpdateScreen(Screen):
 				self.session.open(Console,_("GithubPluginUpdater") + " (" + PluginVersion + ")",[cmd])
 			elif ret == 'restore_backup':
 				list = []
-				for i in range(len(pluginnames)):
+				list.append((_('Backup für GithubPluginUpdater wiederherstellen'), 'restore_backup_4'))
+				for i in range(len(pluginnames)-1):
 					if os.path.isfile(filenames[i]):
-						list.append((_('Backup für ' + pluginnames[i]) + ' wiederherstellen', 'restore_backup_' + str(i)))
+						list.append((_('Backup für ' + pluginnames[i] + ' wiederherstellen'), 'restore_backup_' + str(i)))
 
 				if len(list):
 					self.session.openWithCallback(self.backupmenuCallback, ChoiceBox, title=_('Menü Plugin-Backup wiederherstellen'), list=list)
@@ -677,6 +856,9 @@ class UpdateScreen(Screen):
 			elif ret == 'restore_backup_3':
 				self.backuplocation = os.path.join(self.getBackupLocation(), pluginnames[3])
 				self.backup_pluginName = pluginnames[3]
+			elif ret == 'restore_backup_4':
+				self.backuplocation = os.path.join(self.getBackupLocation(), pluginnames[4])
+				self.backup_pluginName = pluginnames[4]
 			
 			list = []
 			if os.path.isdir(self.backuplocation):
@@ -710,14 +892,15 @@ class UpdateScreen(Screen):
 				self.session.open(MessageBox, _("Die Backup-Wiederherstellung für das Plugin '" + self.backup_pluginName + "' ist fehlgeschlagen.\n\nMöglicherweise befinden sich nicht alle Plugin-Dateien im nachfolgenden Backup-Ordner:\n\n") + self.backup_pluginPath, MessageBox.TYPE_INFO)
 				return
 			
-			self.reloadGitVersion = True
+			#self.reloadGitVersion = True
 			self.reloadLocalVersion = True
 			self.updateExist = False
 			self.runUpdate = True
 			
 			newLine = '\n'
+			sepLine = "="*44
 			cmd = newLine
-			cmd += 'echo -e "========================================================"' + newLine
+			cmd += 'echo -e ' + sepLine + newLine
 			cmd += 'echo -e "\n  Backup-Wiederherstellung für das Plugin -' + self.backup_pluginName + '-"' + newLine
 			cmd += "local_version=$(grep '" + search_strings[number - 1] + "' " + filenames[number - 1] + ')' + newLine
 			cmd += 'local_version=$(echo $local_version | sed "s/' + search_strings[number - 1] + '//")' + newLine
@@ -727,7 +910,7 @@ class UpdateScreen(Screen):
 			cmd += "local_version=$(grep '" + search_strings[number - 1] + "' " + filenames[number - 1] + ')' + newLine
 			cmd += 'local_version=$(echo $local_version | sed "s/' + search_strings[number - 1] + '//")' + newLine
 			cmd += 'echo -e "\n  installierte Version nach der Backup-Wiederherstellung: $local_version"' + newLine
-			cmd += 'echo -e "\n========================================================\n\n"' + newLine
+			cmd += 'echo -e "\n' +sepLine + '\n\n"' + newLine
 			
 			self.session.open(Console, _('GithubPluginUpdater') + ' (' + PluginVersion + ')', [cmd])
 			
@@ -757,7 +940,6 @@ class UpdateScreen(Screen):
 			if self.runUpdate == True:
 				self.session.openWithCallback(self.restartGUI, MessageBox, "Es wurden Plugins aktualisiert!\nSoll jetzt ein GUI-Neustart durchgeführt werden?", MessageBox.TYPE_YESNO)
 			else:
-				#self.close(False,self.session)
 				self.close()
 				
 
@@ -775,31 +957,41 @@ class UpdateScreen(Screen):
 			global pluginsfolder
 			global gitzip_folder
 			global search_strings
+			global PluginVersion
+			
+			if number == 5:
+				local_version = PluginVersion
+			else:
+				local_version = self["myplugin" + str(number) + "_lokal_version"].getText().replace('\n', '').replace('\r', '')
+			
+			pluginname = pluginnames[number-1]
+			filename   = filenames[number-1]
 			
 			newLine = "\n"
+			sepLine = "="*44
 			cmd  = 'cd /tmp' + newLine
 			cmd += 'unset LD_PRELOAD' + newLine
-			cmd += 'echo -e "========================================================"' + newLine
-			cmd += 'echo -e "\n  == Update ' + pluginnames[number-1] + ' =="' + newLine
-			cmd += "local_version=$(grep '" + search_strings[number-1] + "' " + filenames[number-1] + ")" + newLine
+			cmd += 'echo -e ' + sepLine + newLine
+			cmd += 'echo -e "\n  == Update ' + pluginname + ' =="' + newLine
+			cmd += "local_version=$(grep '" + search_strings[number-1] + "' " + filename + ")" + newLine
 			cmd += 'local_version=$(echo $local_version | sed "s/' + search_strings[number-1] + '//")' + newLine
 			cmd += 'echo -e "\n  installierte Version vor dem Update: $local_version"' + newLine
 			
 			if config.plugins.githubpluginupdater.backup.value:
-				cmd += "folder_version=" + self["myplugin" + str(number) + "_lokal_version"].getText() + newLine
-				backupPath = os.path.join(self.backuplocation + pluginnames[number-1], self["myplugin" + str(number) + "_lokal_version"].getText().replace('\n', '').replace('\r', '') + time.strftime('_%Y-%m-%d_%H-%M-%S') + '/')
+				#cmd += "folder_version=" + local_version + newLine
+				backupPath = os.path.join(self.backuplocation + pluginname, local_version.replace(" ","_") + time.strftime('_%Y-%m-%d_%H-%M-%S') + '/')
 
 				#print "=== BackupPath: ", backupPath
-				cmd += 'mkdir -p ' + backupPath + newLine
+				cmd += 'mkdir -p ' + backupPath + newLine 
 				cmd += '#echo -e "Pfad: ' + backupPath + '"' + newLine
-				cmd += "echo -e " + '"' + "\n  sichere lokale Version in '" + backupPath + "'......" + '"' + newLine
+				cmd += "echo -e " + '"' + "\n  sichere lokale Version in: \n  '" + backupPath + "'......" + '"' + newLine
 				cmd += 'cp -pr /usr/lib/enigma2/python/Plugins/Extensions/' + pluginsfolder[number-1] + '/* ' + backupPath + newLine
 			
 			cmd += 'echo -e "\n  lade aktuelle Version von Github......"' + newLine
 
 			#== fuer die DMM-Variante mit curl:  curl gibt es als Paket im jeweiligen Feed unter www.dreamboxupdate.com =======
 			
-			UpdateZipFile = "Update_" + pluginnames[number-1] + ".zip"
+			UpdateZipFile = "Update_" + pluginname + ".zip"
 			cmd += 'wget -o /tmp/' + UpdateZipFile + ' ' + gitzipurls[number-1] + ' 2>/dev/null || curl -A "Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3" -o /tmp/' + UpdateZipFile + ' -sL ' + gitzipurls[number-1] + newLine
 
 			cmd += 'echo -e "\n  installiere aktuelle Github-Version......"' + newLine
@@ -807,11 +999,11 @@ class UpdateScreen(Screen):
 			cmd += 'cp -pr /tmp/' + gitzip_folder[number-1] + '/src/* /usr/lib/enigma2/python/Plugins/Extensions/' + pluginsfolder[number-1] + '/' + newLine
 			cmd += 'rm -rf /tmp/' + gitzip_folder[number-1] +' /tmp/' + UpdateZipFile + newLine
 			
-			cmd += "local_version=$(grep '" + search_strings[number-1] + "' " + filenames[number-1] + ")" + newLine
+			cmd += "local_version=$(grep '" + search_strings[number-1] + "' " + filename + ")" + newLine
 			cmd += 'local_version=$(echo $local_version | sed "s/' + search_strings[number-1] + '//")' + newLine
   
 			cmd += 'echo -e "\n  installierte Version nach dem Update: $local_version"' + newLine
-			cmd += 'echo -e "\n========================================================\n\n"'
+			cmd += 'echo -e "\n' + sepLine + '\n\n"'
 			
 			return cmd
 
@@ -847,3 +1039,109 @@ class UpdateInfo(Screen):
 		if confirm:
 			self.session.open(UpdateScreen)
 		self.close()
+
+
+class showUpdateInfo(Screen):
+	def __init__(self, session, text, titleText, firstLineText, lastLineText, number):
+		Screen.__init__(self, session)
+		self.skinName = ["TestBox", "Console"]
+		title = ""
+		self.text						= text
+		self.titleText			= titleText
+		self.firstLineText	= firstLineText
+		self.lastLineText		= lastLineText
+		self.number = number
+		
+		self["text"] = ScrollLabel("")
+		self["actions"] = ActionMap(["WizardActions", "DirectionActions", "ChannelSelectBaseActions"], 
+		{
+			"ok":    self.cancel,
+			"back":  self.cancel,
+			"up":    self["text"].pageUp,
+			"down":  self["text"].pageDown,
+			"left":  self["text"].pageUp,
+			"right": self["text"].pageDown,
+			"nextBouquet":	self["text"].lastPage,
+			"prevBouquet":	self.firstPage,
+		}, -1)
+		
+		self.onLayoutFinish.append(self.setUpdateInfo)
+
+	def cancel(self):
+		self.close()
+
+	def setText(self, text):
+		self["text"].setText(text)
+
+	def close(self):
+		if hasattr(self, "deferred"):
+			self.deferred.cancel()
+			del self.deferred
+		Screen.close(self)
+
+	def firstPage(self):
+		self["text"].long_text.move(ePoint(0,0))
+		self["text"].updateScrollbar()
+
+	def loadcommits(self):
+
+		global githubcommitlisturls
+		
+		url = "https://api.github.com/repos/" + githubcommitlisturls[self.number-1] + "/commits"
+		self.deferred = getPage(url, timeout=5, method="GET", headers={'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3',})
+		self.deferred.addCallback(self.getCommitsContent)
+		self.deferred.addErrback(self.errorHandler)
+
+	def errorHandler(self, result):
+			print "== GithubPluginUpdater getContentError: ", result
+			self["text"].setText(self.firstLineText + "Error\n\nEs konnte keine github-Update-Info ermittelt werden.")
+
+	def getCommitsContent(self, contents):
+		
+		try:
+			import simplejson as json
+		except ImportError:
+			import json
+		
+		try:
+			commits = json.loads(contents)
+			
+			text = ""
+			sepLine = "="*44
+			for commit in commits:
+				if commit:
+					date  	= commit['commit']['author']['date'][:-1]
+					author	= commit['commit']['author']['name']
+					message = str(commit['commit']['message'])
+					if commit['author']:
+						author 	= commit['author']['login']
+					zeile = author + " (" + date + ")\n" + str(message) + "\n\n" + sepLine + "\n\n"
+					text += zeile
+
+			if len(text) == 0:
+				text = "Es konnte keine github-Update-Info ermittelt werden."
+			else:
+				text = sepLine + "\n\n" + str(text)
+			if self.firstLineText != "":
+				text = self.firstLineText + str(text)
+			if self.lastLineText != "":
+				text = str(text) + self.lastLineText
+			self.setText(str(text))
+		except:
+			import traceback
+			traceback.print_exc()
+			text = "Error\n\nEs konnte keine github-Update-Info ermittelt werden."
+			self.setText(text)
+
+	def setUpdateInfo(self):
+		
+		# Set title and text
+		title = _("Show Update-Info") + " - " + self.titleText
+		text =  self.firstLineText + _("\nLade Update-info...\n")+ _("\n\nExit-Taste zum Abbrechen")
+		
+		self.setTitle(title)
+		self.setText(text)
+		
+		self.loadcommits()
+
+

@@ -20,8 +20,6 @@ from Components.Label import Label
 # Configuration
 from Components.config import * 
 
-#from GithubPluginUpdater import pluginnames, filenames
-
 import os
 
 PluginVersion = ""
@@ -47,7 +45,7 @@ class GithubPluginUpdaterSetup(Screen, ConfigListScreen):
 		</screen>"""
 	else:
 		skin = """
-		<screen name="GithubPluginUpdaterSetup" position="center,center" size="800,500">
+		<screen name="GithubPluginUpdaterSetup" position="center,center" size="800,530">
 			<ePixmap pixmap="skin_default/buttons/red.png" position="0,0" size="200,40" scale="stretch" alphatest="on" />
 			<ePixmap pixmap="skin_default/buttons/green.png" position="200,0" size="200,40" scale="stretch" alphatest="on" />
 			<ePixmap pixmap="skin_default/buttons/yellow.png" position="400,0" size="200,40" scale="stretch" alphatest="on" />
@@ -56,9 +54,9 @@ class GithubPluginUpdaterSetup(Screen, ConfigListScreen):
 			<widget source="key_green" render="Label" position="200,0" zPosition="1" size="200,40" font="Regular;22" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
 			<widget source="key_yellow" render="Label" position="400,0" zPosition="1" size="200,40" font="Regular;22" halign="center" valign="center" backgroundColor="#9f1313" transparent="1" />
 			<widget source="key_blue" render="Label" position="600,0" zPosition="1" size="200,40" font="Regular;22" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
-			<widget name="config" position="5,50" itemHeight="30" size="790,350" enableWrapAround="1" scrollbarMode="showOnDemand" />
-			<ePixmap pixmap="skin_default/div-h.png" position="0,401" zPosition="2" size="800,2" />
-			<widget name="help" position="5,405" size="790,75" font="Regular;22" />
+			<widget name="config" position="5,50" itemHeight="30" size="790,380" enableWrapAround="1" scrollbarMode="showOnDemand" />
+			<ePixmap pixmap="skin_default/div-h.png" position="0,431" zPosition="2" size="800,2" />
+			<widget name="help" position="5,435" size="790,75" font="Regular;22" />
 		</screen>"""
 
 
@@ -121,9 +119,10 @@ class GithubPluginUpdaterSetup(Screen, ConfigListScreen):
 				self.list.append( getConfigListEntry(_("       Antwort für Frage steht standardmäßig auf:"), config.plugins.githubpluginupdater.updatequestion_defaultanswer, _("Legt fest, welche Antwort für die Frage zum Öffnen des GithubPluginUpdaters standardmäßig vorausgewählt sein soll. Bei 'nein' öffnet sich das Plugin bei Zeitablauf der Frage nicht automatisch.")) )
 			
 			from GithubPluginUpdater import pluginnames, filenames
-			for counter, pl in enumerate(pluginnames):
+			self.list.append( getConfigListEntry(_("   Update-Check für %s bei Box-Start") % pluginnames[4], config.plugins.githubpluginupdater.update_check[pluginnames[4]], _("Legt fest, ob für das Plugin beim Box-Start eine Update-Prüfung durchgeführt werden soll.")) )
+			for counter in range(len(pluginnames)-1):
 				if os.path.isfile(filenames[counter]):
-					self.list.append( getConfigListEntry(_("   Update-Check für %s bei Box-Start") % pl, config.plugins.githubpluginupdater.update_check[pl], _("Legt fest, ob für das Plugin beim Box-Start eine Update-Prüfung durchgeführt werden soll.")) )
+					self.list.append( getConfigListEntry(_("   Update-Check für %s bei Box-Start") % pluginnames[counter], config.plugins.githubpluginupdater.update_check[pluginnames[counter]], _("Legt fest, ob für das Plugin beim Box-Start eine Update-Prüfung durchgeführt werden soll.")) )
 		
 		self.list.append( getConfigListEntry(_("Warnhinweis vor einem github-Update anzeigen"), config.plugins.githubpluginupdater.show_warninginfo, _("Der Warnhinweis vor einem github-Update zu den möglichen Folgen eines solchen Updates kann hier aktiviert bzw. deaktiviert werden.")) )
 		self.list.append( getConfigListEntry(_("erzeuge ein Backup des Plugins vor dem Update"), config.plugins.githubpluginupdater.backup, _("Legt vor dem Update der Github-Version ein Backup des lokalen Plugins an.")) )
@@ -186,12 +185,3 @@ class GithubPluginUpdaterSetup(Screen, ConfigListScreen):
 
 	def createSummary(self):
 		return SetupSummary
-
-########################################################################### 
-
-#def setup_main(session, VERSION, **kwargs): 
-#	global PluginVersion
-#	PluginVersion = VERSION
-#	session.open(GithubPluginUpdaterSetup)
-
-########################################################################### 

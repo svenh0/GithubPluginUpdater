@@ -6,12 +6,12 @@ from Screens.MessageBox import MessageBox
 from socket import timeout
 from twisted.web.client import getPage
 
-from GithubPluginUpdater import githuburls, search_strings, filenames, pluginnames, lastgithubcommits
+from GithubPluginUpdater import reload_value, githuburls, search_strings, filenames, pluginnames, lastgithubcommits
 
 import GithubPluginUpdater
 import AutoUpdateCheck
 
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 
 session = None
 getPageCounter = 0
@@ -30,7 +30,8 @@ def leaveStandby():
 	try:
 		print "=====[GithubPluginUpdater] aus standby aufgewacht ..."
 		if config.plugins.githubpluginupdater.enable_autocheck.value != "False":
-			reload(AutoUpdateCheck)
+			if reload_value:
+				reload(AutoUpdateCheck)
 			from AutoUpdateCheck import loadPages as checkupdate
 			checkupdate(session)
 
@@ -56,7 +57,8 @@ def sessionstart(reason, **kwargs):
 		
 		print "=====[GithubPluginUpdater] runUpdateCheck in sessionstart ...."
 		if config.plugins.githubpluginupdater.enable_autocheck.value != "False":
-			reload(AutoUpdateCheck)
+			if reload_value:
+				reload(AutoUpdateCheck)
 			from AutoUpdateCheck import loadPages as checkupdate
 			checkupdate(session)
 	else:
@@ -76,15 +78,11 @@ def autostart(reason, **kwargs):
 
 def main(session, **kwargs):
 
-	reload(GithubPluginUpdater)
+	if reload_value:
+		reload(GithubPluginUpdater)
 	try:
 		from GithubPluginUpdater import UpdateScreen
 		session.open(UpdateScreen)
-
-#	reload(AutoUpdateCheck)
-#	try:
-#		from AutoUpdateCheck import loadPages as checkupdate
-#		checkupdate(session)
 
 	except:
 		import traceback

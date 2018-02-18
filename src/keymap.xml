@@ -1,0 +1,25 @@
+<keymap>
+	<map context="GithubPluginUpdaterActions">
+			<key id="KEY_RED" 		mapto="red" 				flags="b" />
+			<key id="KEY_GREEN" 	mapto="green" 			flags="b" />
+			<key id="KEY_YELLOW" 	mapto="yellow" 			flags="b" />
+			<key id="KEY_BLUE" 		mapto="blue" 				flags="b" />
+			<key id="KEY_RED" 		mapto="red_long" 		flags="l" />
+			<key id="KEY_GREEN" 	mapto="green_long" 	flags="l" />
+			<key id="KEY_YELLOW" 	mapto="yellow_long"	flags="l" />
+			<key id="KEY_BLUE" 		mapto="blue_long" 	flags="l" />
+			<key id="KEY_1" 			mapto="1" 					flags="b" />
+			<key id="KEY_2" 			mapto="2" 					flags="b" />
+			<key id="KEY_3" 			mapto="3" 					flags="b" />
+			<key id="KEY_4" 			mapto="4" 					flags="b" />
+			<key id="KEY_1" 			mapto="1_long" 			flags="l" />
+			<key id="KEY_2" 			mapto="2_long" 			flags="l" />
+			<key id="KEY_3" 			mapto="3_long" 			flags="l" />
+			<key id="KEY_4" 			mapto="4_long" 			flags="l" />
+			<key id="KEY_OK" 			mapto="ok" 					flags="m" />
+			<key id="KEY_EXIT" 		mapto="cancel" 			flags="m" />
+			<key id="KEY_INFO" 		mapto="info" 				flags="b" />
+			<key id="KEY_INFO" 		mapto="info_lang"		flags="l" />
+			<key id="KEY_MENU" 		mapto="menu" 				flags="m" />
+	</map>
+</keymap>
