@@ -115,22 +115,34 @@ def getLastCommit(contents, number):
 					f.close()
 					local_version = getGPUVersion(plugin_txt)
 					github_version = getGPUVersion(contents)
-					print "========= GPU local_version, github_version: ", local_version, github_version
+					print "=====[GithubPluginUpdater] GPU local_version, github_version: ", local_version, github_version
 					if checkGPUVersion(local_version, github_version):
 						UpdateExist = True
 						UpdatePluginnames += "\n    - " + "GithubPluginUpdater (" + github_version + ")"
 				
-				#== die anderen Plugins - jedoch nur wenn Plugin installiert ist ===
+				#== die anderen Plugins - jedoch nur wenn das Plugin installiert ist ===
 				elif os.path.isfile(filenames[number-1]):
 					last_commit = ""
 					last_local_commit = config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value
-					print "========= last_local_Commit:  ", last_local_commit, pluginnames[number-1]
+					#print "========= last_local_Commit:  ", last_local_commit, pluginnames[number-1]
 
 					search_string = "<relative-time datetime="
 					pos1 = contents.find(search_string)
 					if pos1 > 0:
+						print "=====[GithubPluginUpdater] found relative time ==", pluginnames[number-1]
 						last_commit = str(contents[pos1+25:pos1+25+19])
-
+					else:
+						#print "===== not found relative-time ==", pluginnames[number-1]
+						search_string = 'class="js-navigation-open" title="src" id='
+						pos1 = contents.find(search_string)
+						if pos1 > 0:
+							#print "=== found src on pos:", pos1
+							search_string = "<time-ago datetime="
+							pos2 = contents.find(search_string, pos1)
+							if pos2 > 0:
+								print "=====[GithubPluginUpdater] found time ago ==", pluginnames[number-1]
+								last_commit = str(contents[pos2+20:pos2+20+19])
+					
 					if last_local_commit < last_commit:
 						UpdateExist = True
 						UpdatePluginnames += "\n    - " + pluginnames[number-1]

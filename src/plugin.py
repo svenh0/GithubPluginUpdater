@@ -11,7 +11,7 @@ from GithubPluginUpdater import reload_value, githuburls, search_strings, filena
 import GithubPluginUpdater
 import AutoUpdateCheck
 
-VERSION = "1.3.0"
+VERSION = "1.4.0"
 
 session = None
 getPageCounter = 0

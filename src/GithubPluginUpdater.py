@@ -211,6 +211,7 @@ class UpdateScreen(Screen, HelpableScreen):
 			global pluginnames, filenames, color_strings
 
 			for i in range(len(pluginnames)-1):
+				#print "=====[GithubPluginUpdater] set label: ", i, pluginnames[i]
 				self["myplugin" + str(i+1) + "_name"] = Label(pluginnames[i])
 				self["myplugin" + str(i+1) + "_lokal_version"] = Label("...")
 				self["myplugin" + str(i+1) + "_lokal_date"] = Label("(...)")
@@ -447,6 +448,19 @@ class UpdateScreen(Screen, HelpableScreen):
 				if pos2 > 0:
 					pos3 = contents.find('">',pos2+len('class="message" data-pjax="true" title="') )
 					updateinfo = str(contents[pos2+len('class="message" data-pjax="true" title="'):pos3])
+			else:
+					search_string = 'class="js-navigation-open" title="src" id='
+					pos1 = contents.find(search_string)
+					if pos1 > 0:
+						pos2 = contents.find('<a data-pjax="true" title="',pos1)
+						if pos2 > 0:
+							pos3 = contents.find('" class=',pos2+len('<a data-pjax="true" title="') )
+							updateinfo = str(contents[pos2+len('<a data-pjax="true" title="'):pos3])
+							try:
+								from HTMLParser import HTMLParser
+								updateinfo = HTMLParser().unescape(updateinfo)
+							except:
+								pass
 			
 			return updateinfo
 
@@ -499,11 +513,11 @@ class UpdateScreen(Screen, HelpableScreen):
 			global lastgithubcommits
 
 			check_curl = subprocess.check_output("opkg list-installed curl", shell=True)
-			print "=== cmd-output curl ===: ", check_curl
+			print "=====[GithubPluginUpdater] cmd-output curl ===: ", check_curl
 
 			if not check_curl:
 				check_wget = subprocess.check_output("opkg list-installed wget", shell=True)
-				print "=== cmd-output wget ===: ", check_wget
+				print "=====[GithubPluginUpdater] cmd-output wget ===: ", check_wget
 
 			if not check_curl and not check_wget:
 				self.session.open(MessageBox, "Das Update konnte nicht gestartet werden!\n\nEs muss erst das curl-Paket installiert werden.\n\nDas curl-Paket kann im Plugin per Menü-Taste über den Eintrag 'curl-Paket auf der Box installieren' installiert werden!.\n\n\nper Telnet geht es z.B. mit folgendem Befehl:\n\n opkg install curl", MessageBox.TYPE_INFO)
@@ -522,7 +536,7 @@ class UpdateScreen(Screen, HelpableScreen):
 				self.runUpdate = True
 				
 				cmd = self.getConsoleCmd(number)
-				print "=======\n", cmd
+				#print "=======\n", cmd
 				self.session.open(Console,_("GithubPluginUpdater") + " (" + PluginVersion + ")",[cmd])
 				
 				if number != 5:
@@ -585,7 +599,7 @@ class UpdateScreen(Screen, HelpableScreen):
 
 			self.getPageCounter += 2
 			
-			if number < 4:
+			if number < 5:
 				self["myplugin" + str(number) + "_git_version"].instance.setForegroundColor(parseColor("foreground"))
 				self["myplugin" + str(number) + "_lokal_version"].instance.setForegroundColor(parseColor("foreground"))
 				self["myplugin" + str(number) + "_name"].instance.setForegroundColor(parseColor("foreground"))
@@ -597,7 +611,6 @@ class UpdateScreen(Screen, HelpableScreen):
 			self.deferred.addCallback(self.getWebContent, number)
 			self.deferred.addErrback(self.errorHandler, number)
 
-			#https://api.github.com/repos/..USER../..PLUGIN../git/refs/heads/master - getLastCommitUrl
 			url = githubcommiturls[number-1]
 			self.deferred = getPage(url, timeout=5)
 			self.deferred.addCallback(self.getLastCommit, number)
@@ -608,7 +621,7 @@ class UpdateScreen(Screen, HelpableScreen):
 			
 			self.getContentCounter += 1
 			self.getContentWithError = True
-			print "== GithubPluginUpdater getContentError: ", number, result
+			print "=====[GithubPluginUpdater] getContentError: ", number, result
 
 			self.checkIfLastPage()
 
@@ -643,17 +656,21 @@ class UpdateScreen(Screen, HelpableScreen):
 				self.getContentCounter += 1
 				search_string = "<relative-time datetime="
 				
+				pos1=0
 				pos1 = contents.find(search_string)
 				if pos1 > 0:
-					#print "===== found relative-time ==", pluginnames[number-1]
+					print "=====[GithubPluginUpdater] found relative time ==", pluginnames[number-1]
 					last_commit[number-1] = str(contents[pos1+25:pos1+25+19])
 				else:
 					#print "===== not found relative-time ==", pluginnames[number-1]
-					search_string = "<time-ago datetime=", pluginnames[number-1]
+					search_string = 'class="js-navigation-open" title="src" id='
 					pos1 = contents.find(search_string)
 					if pos1 > 0:
-						#print "===== found time-ago ==" 
-						last_commit[number-1] = str(contents[pos1+20:pos1+20+19])
+						search_string = "<time-ago datetime="
+						pos1 = contents.find(search_string, pos1)
+						if pos1 > 0:
+							print "=====[GithubPluginUpdater] found time ago ==", pluginnames[number-1]
+							last_commit[number-1] = str(contents[pos1+20:pos1+20+19])
 				
 				#set last commit-info-text
 				last_commit_info[number-1] = self.getLastCommitInfo(contents)
@@ -670,7 +687,7 @@ class UpdateScreen(Screen, HelpableScreen):
 						self["myplugin" + str(number) + "_name"].instance.setForegroundColor(parseColor("red"))
 						self["myplugin" + str(number) + "_update"].show()
 						self.updateExist = True
-						print "===== new commit === local_Commit, last_commit: ", last_local_commit, last_commit[number-1], pluginnames[number-1]
+						print "=====[GithubPluginUpdater] new commit === local_Commit, last_commit: ", last_local_commit, last_commit[number-1], pluginnames[number-1]
 					else:
 						self["myplugin" + str(number) + "_git_version"].instance.setForegroundColor(parseColor("foreground"))
 						self["myplugin" + str(number) + "_lokal_version"].instance.setForegroundColor(parseColor("green"))
@@ -796,7 +813,7 @@ class UpdateScreen(Screen, HelpableScreen):
 
 	def menuCallback(self, ret):
 		ret = ret and ret[1]
-		print "=== ret ===", ret
+		#print "=====[GithubPluginUpdater] ret menuCallback ===", ret
 		if ret:
 			if ret == "setup":
 				self.setup()
@@ -842,7 +859,7 @@ class UpdateScreen(Screen, HelpableScreen):
 
 	def backupmenuCallback(self, ret):
 		ret = ret and ret[1]
-		print '=== ret backupmenu ===', ret
+		#print "=====[GithubPluginUpdater] ret backupmenu ===", ret
 		if ret:
 			if ret == 'restore_backup_0':
 				self.backuplocation = os.path.join(self.getBackupLocation(), pluginnames[0])
@@ -877,7 +894,7 @@ class UpdateScreen(Screen, HelpableScreen):
 
 	def backupfolderCallback(self, ret):
 		ret = ret and ret[1]
-		print '=== ret backupfolder ===', ret
+		#print "=====[GithubPluginUpdater] ret backupfolder ===", ret
 		if ret:
 			self.backup_pluginPath = ret
 			self.session.openWithCallback(self.runRestoreBackupCallback, MessageBox, _("Soll das nachfolgende Backup für das Plugin '" + self.backup_pluginName + "' wirklich wiederhergestellt werden?\n\nBackup:\n") + str(ret), MessageBox.TYPE_YESNO)
@@ -1093,7 +1110,7 @@ class showUpdateInfo(Screen):
 		self.deferred.addErrback(self.errorHandler)
 
 	def errorHandler(self, result):
-			print "== GithubPluginUpdater getContentError: ", result
+			print "=====[GithubPluginUpdater] getContentError: ", result
 			self["text"].setText(self.firstLineText + "Error\n\nEs konnte keine github-Update-Info ermittelt werden.")
 
 	def getCommitsContent(self, contents):
