@@ -318,6 +318,7 @@ class UpdateScreen(Screen, HelpableScreen):
 			self.getContentWithError = False
 			self.showUpdateMsgBox = False
 			self.checkType=""
+			self.gpu_git_version = ""
 		
 			self.onShown.append(self.loadLimitRemaining)
 			self.onLayoutFinish.append( self.LayoutFinish )
@@ -358,6 +359,11 @@ class UpdateScreen(Screen, HelpableScreen):
 				gpu_version = str(contents[pos1:pos2])
 				gpu_version = gpu_version.replace(search_string,"")
 				gpu_version = gpu_version.replace('"',"")
+				self.gpu_git_version = gpu_version
+			
+			self.showSelfUpdateMessage(gpu_version)
+
+	def showSelfUpdateMessage(self, gpu_version, autocheck=False):
 			
 			local_version = PluginVersion
 			#local_version = "1.1.0"
@@ -372,11 +378,11 @@ class UpdateScreen(Screen, HelpableScreen):
 			else:
 				local_version_split = local_version.split(".")
 				local_version_split = map(lambda x: int(x), local_version_split)
-
+			
 			message_txt  = "Updateprüfung für GithubPluginUpdater:\n"
 			
 			if self.gpu_force_install or (gpu_version_split > local_version_split): 
-				message_txt += "github Version: " + gpu_version + " (" + last_commit[4] + ")\n"
+				message_txt += "github Version: " + self.gpu_git_version + " (" + last_commit[4] + ")\n"
 				last_commit_info_txt = last_commit_info[4].split("\n")
 				if len(last_commit_info_txt)>3:
 					last_commit_info_txt = "\n".join(last_commit_info_txt[:3])
@@ -389,9 +395,16 @@ class UpdateScreen(Screen, HelpableScreen):
 				self.UpdateNumber = 5 
 				self.session.openWithCallback(self.runUpdateScriptCallback, MessageBox, message_txt, MessageBox.TYPE_YESNO, default = True)
 
+			elif autocheck == True: #fix wrong updateinfo if is use the current version (on open plugin)
+				#print "=== git, local, lastcommitconf, lastcommit", gpu_version_split, local_version_split, config.plugins.githubpluginupdater.lastcommit[pluginnames[4]].value, last_commit[4]
+				if gpu_version_split == local_version_split and config.plugins.githubpluginupdater.lastcommit[pluginnames[4]].value < last_commit[4]:
+					config.plugins.githubpluginupdater.lastcommit[pluginnames[4]].value = last_commit[4]
+					config.plugins.githubpluginupdater.lastcommit[pluginnames[4]].save()
+					print "[GithubPluginUpdater] fix LastCommit for GithubPluginUpdater"
+					#print "=== lastcommitconf, lastcommit", gpu_version_split, local_version_split, config.plugins.githubpluginupdater.lastcommit[pluginnames[4]].value, last_commit[4]
 			else:
-				message_txt += "\ngithub Version: " + gpu_version + " (" + last_commit[4] + ")\n"
-				message_txt += "lokale Version:  " + local_version + " (" + config.plugins.githubpluginupdater.lastcommit[pluginnames[4]].value + ")\n\n"
+				message_txt += "\ngithub Version: " + self.gpu_git_version + " (" + last_commit[4] + ")\n"
+				message_txt += "lokale Version:  " + PluginVersion + " (" + config.plugins.githubpluginupdater.lastcommit[pluginnames[4]].value + ")\n\n"
 				message_txt += "Es wird bereits die aktuellste Version genutzt!                        \n "
 				if self.showUpdateMsgBox == False:
 					self.session.open(MessageBox, message_txt, MessageBox.TYPE_INFO)
@@ -731,6 +744,8 @@ class UpdateScreen(Screen, HelpableScreen):
 					#set github version in the screen
 					if number !=5:
 						self["myplugin" + str(number) + "_git_version"].setText(git_version)
+					else:
+						self.gpu_git_version = git_version
 
 			self.checkIfLastPage()
 
@@ -861,11 +876,14 @@ class UpdateScreen(Screen, HelpableScreen):
 				self.deferred = getPage(url, timeout=5, headers=headers)
 				self.deferred.addCallback(self.loadLimitRemaining_getWebContent)
 				self.deferred.addErrback(self.errorHandler, 0)
+				
+				# check if exist update for GithubPluginUpdater
+				self.gpu_force_install = False
+				self.showSelfUpdateMessage(self.gpu_git_version, True)
 
 	def getLocalVersion(self, PluginName, number):
 		
 		try:
-
 			local_label_name = "myplugin" + str(number) + "_lokal_version"
 			
 			local_version = self.readLocalVersion(number)
@@ -891,7 +909,6 @@ class UpdateScreen(Screen, HelpableScreen):
 	def readLocalVersion(self, number):
 		
 		try:
-			
 			global filenames
 			global search_strings
 			

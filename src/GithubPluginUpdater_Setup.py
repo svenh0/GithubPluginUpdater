@@ -197,7 +197,8 @@ class GithubPluginUpdaterSetup(Screen, ConfigListScreen):
 		try:
 			check_interval = [x for x in config.plugins.githubpluginupdater.autoCheck_interval.choices.choices if config.plugins.githubpluginupdater.autoCheck_interval.value == x[0]][0][1]
 			lastcheck = datetime.fromtimestamp(int(config.plugins.githubpluginupdater.lastAutoCheck.value))
-			text = 'GithubPluginUpdater Update-Info\n\nLetzer Update-Check: %s' % lastcheck
+			text = 'GithubPluginUpdater Update-Info\n\nLetzter Update-Check: \t%s' % lastcheck
+			text = text.expandtabs(14)
 			if config.plugins.githubpluginupdater.enable_autocheck.value:
 				#calculate the time for next updateCheck
 				lastcheck = int(config.plugins.githubpluginupdater.lastAutoCheck.value)
@@ -218,8 +219,10 @@ class GithubPluginUpdaterSetup(Screen, ConfigListScreen):
 					# reset day in the next month date
 					nextcheck = next_month.replace(day=datetime.fromtimestamp(lastcheck).day) 
 				if config.plugins.githubpluginupdater.autoCheck_interval.value != "0":
-					text += '\nnächster Update-Check: %s' % nextcheck
-				text += '\nCheck-Interval: %s' % check_interval
+					text += '\nnächster Update-Check: \t%s' % nextcheck
+					text = text.expandtabs(3)
+				text += '\nCheck-Interval: \t%s' % check_interval
+				text = text.expandtabs(34)
 			self.session.open(MessageBox, text, MessageBox.TYPE_INFO)
 		except:
 			import traceback
