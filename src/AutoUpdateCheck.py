@@ -9,10 +9,16 @@ from socket import timeout
 from twisted.web.client import getPage
 from Tools.BoundFunction import boundFunction
 
-from GithubPluginUpdater import reload_value, githuburls, pluginnames, lastgithubcommits, githubcommiturls, search_strings, filenames
+from GithubPluginUpdater import reload_value, githuburls, pluginnames, lastgithubcommits, githubcommiturls, githubcommitlisturls,search_strings, filenames
 
 import GithubPluginUpdater
 import os
+import time
+
+try:
+	import simplejson as json
+except ImportError:
+	import json
 
 session = None
 getPageCounter = 0
@@ -20,39 +26,89 @@ getContentCounter = 0
 UpdateExist = False
 UpdatePluginnames = ""
 
+limit_remaining = 60
+limit_resetTime = 0
+checkType = ""
 
-def loadPages(gpu_session):
+def startAutoUpdate(gpu_session):
+			#print "=====[GithubPluginUpdater] startAutoUpdate"
+			global session
+			session = gpu_session
 			
+			import Screens.Standby
+			if Screens.Standby.inStandby:
+				print "[GithubPluginUpdater] inStandby - don't check for updates"
+				return
+			
+			if config.plugins.githubpluginupdater.check_type.value.startswith("api"):
+				#load rate limit at first if check with api
+				headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36',}
+				url = "https://api.github.com/rate_limit"
+				deferred = getPage(url, timeout=10, headers=headers)
+				deferred.addCallback(loadLimitRemaining_getWebContent)
+				deferred.addErrback(errorHandler, 0)
+			else:
+				loadPages()
+
+def loadLimitRemaining_getWebContent(contents):
+			#print "=====[GithubPluginUpdater] AutoUpdate loadLimitRemainig_getWebContent"
+			contents = json.loads(contents)
+			
+			global limit_remaining, limit_resetTime
+			limit_remaining = contents['rate']['remaining']
+			limit_resetTime = contents['rate']['reset']
+			#print "=====[GithubPluginUpdater] AutoUpdate LimitRemainig", limit_remaining
+			loadPages()
+
+def loadPages():
+			
+			#print "=====[GithubPluginUpdater] start loadPages"
 			global githuburls
 			global githubcommiturls
 			global getPageCounter
 			global session
 			global UpdatePluginnames
 			global getContentCounter
-			
-			session = gpu_session
+			global limit_remaining, limit_resetTime
+			global checkType
 			
 			getContentCounter = 0
 			getPageCounter = 0
 			UpdateExist = False
 			UpdatePluginnames = ""
-			
 			getPageCounter = 0
+			
+			headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36',}
 
-			for i in range(len(githubcommiturls)-1):
-				
+			for i in range(len(githubcommiturls)):
+				#check for last github-commit-Date
 				if os.path.isfile(filenames[i]) and config.plugins.githubpluginupdater.update_check[pluginnames[i]].value:
 					getPageCounter +=1
-					deferred = getPage(githubcommiturls[i], timeout=10)
+					
+					#set url to get lastcommit-Date
+					if int(limit_remaining) > 0 and config.plugins.githubpluginupdater.check_type.value.startswith("api"):
+						if config.plugins.githubpluginupdater.checkonly_src.value:
+							url = "https://api.github.com/repos/" + githubcommitlisturls[i] + "/commits?callback=commits&path=src&page=1&per_page=1"
+						else:
+							url = "https://api.github.com/repos/" + githubcommitlisturls[i] + "/commits?callback=commits&page=1&per_page=1"
+						checkType = "api"
+					
+					elif (int(limit_remaining) == 0 and config.plugins.githubpluginupdater.check_type.value == "api-normal") or config.plugins.githubpluginupdater.check_type.value == "normal":
+						url = githubcommiturls[i]
+						if config.plugins.githubpluginupdater.checkonly_src.value:
+							url += "/tree/master/src" # check only src-folder
+						checkType = "normal"
+					
+					elif config.plugins.githubpluginupdater.check_type.value in ("commits","api-commits"):
+						url = githubcommiturls[i] + "/commits/master"
+						if config.plugins.githubpluginupdater.checkonly_src.value:
+							url += "/src" # check only src-folder
+						checkType = "commits"
+
+					deferred = getPage(url, timeout=10, headers=headers)
 					deferred.addCallback(getLastCommit, i+1)
 					deferred.addErrback(errorHandler, i+1)
-			
-			#check for GithubPluginUpdater
-			if config.plugins.githubpluginupdater.update_check[pluginnames[4]].value:
-				getPageCounter +=1
-				deferred = getPage(githuburls[4], timeout=10)
-				deferred.addCallback(getLastCommit, 5)
-				deferred.addErrback(errorHandler, 5)
+					#print "=====[GithubPluginUpdater] start loadPages - check", pluginnames[i], url
 
 def errorHandler(result, number):
 			
@@ -62,38 +118,6 @@ def errorHandler(result, number):
 			getContentCounter += 1
 			if getContentCounter == getPageCounter:
 				getUpdateInfoMessage(MessageBox.TYPE_ERROR)
-
-
-def getGPUVersion(content):
-
-			gpu_version=""
-			search_string = "VERSION = "
-			pos1 = content.find(search_string)
-			if pos1 > 0:
-				pos2 = content.find("\n",pos1+len(search_string))
-				gpu_version = str(content[pos1:pos2])
-				gpu_version = gpu_version.replace(search_string,"")
-				gpu_version = gpu_version.replace('"',"")
-			return gpu_version
-
-def checkGPUVersion(local_version, github_version):
-			
-			github_version_split = github_version.split(".")
-			github_version_split = map(lambda x: int(x), github_version_split)
-			if " beta" in local_version:
-				local_version_split = local_version.split(" ")[0].split(".")
-				local_version_split = map(lambda x: int(x), local_version_split)
-				#set higher github-Version at beta
-				local_version_split.append(0)
-				github_version_split.append(1)
-			else:
-				local_version_split = local_version.split(".")
-				local_version_split = map(lambda x: int(x), local_version_split)
-			
-			if (github_version_split > local_version_split):
-				return True
-			
-			return False
 
 def getLastCommit(contents, number):
 			
@@ -105,49 +129,74 @@ def getLastCommit(contents, number):
 				global lastgithubcommits
 				global session
 				global UpdatePluginnames
-			
+				global limit_remaining, limit_resetTime
+				
+				#print "=====[GithubPluginUpdater] getLastCommit for:", pluginnames[number-1]
+				
 				getContentCounter += 1
 				
-				#== check Update for GithubPluginUpdater
-				if number == 5:
-					f = open(filenames[number-1], 'r')
-					plugin_txt = f.read()
-					f.close()
-					local_version = getGPUVersion(plugin_txt)
-					github_version = getGPUVersion(contents)
-					print "=====[GithubPluginUpdater] GPU local_version, github_version: ", local_version, github_version
-					if checkGPUVersion(local_version, github_version):
-						UpdateExist = True
-						UpdatePluginnames += "\n    - " + "GithubPluginUpdater (" + github_version + ")"
+				checkonly = "main"
+				if config.plugins.githubpluginupdater.checkonly_src.value: checkonly = "src"
 				
 				#== die anderen Plugins - jedoch nur wenn das Plugin installiert ist ===
-				elif os.path.isfile(filenames[number-1]):
+				if os.path.isfile(filenames[number-1]):
 					last_commit = ""
 					last_local_commit = config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value
 					#print "========= last_local_Commit:  ", last_local_commit, pluginnames[number-1]
 
-					search_string = "<relative-time datetime="
-					pos1 = contents.find(search_string)
-					if pos1 > 0:
-						print "=====[GithubPluginUpdater] found relative time ==", pluginnames[number-1]
-						last_commit = str(contents[pos1+25:pos1+25+19])
-					else:
-						#print "===== not found relative-time ==", pluginnames[number-1]
-						search_string = 'class="js-navigation-open" title="src" id='
+					if int(limit_remaining) > 0 and config.plugins.githubpluginupdater.check_type.value.startswith("api"):
+						jsonp = contents
+						contents = jsonp[ jsonp.index("(") + 1 : jsonp.rindex(")") ]
+						commits = json.loads(contents)
+						#print "=== contents: ", commits['meta']
+						limit_remaining = commits['meta']['X-RateLimit-Remaining']
+						limit_resetTime = commits['meta']['X-RateLimit-Reset']
+						limit = commits['meta']['X-RateLimit-Limit']
+						
+						if limit_remaining != "0":
+							commits = commits['data']
+							for commit in commits:
+								if commit:
+									#print "=== commit: ", commit
+									last_commit = str(commit['commit']['author']['date'][:-1])
+									last_commit_info = str(commit['commit']['message'])
+									#print "=== Commit-Info:", pluginnames[number-1], last_commit[number-1], last_commit_info[number-1]
+									
+									print "[GithubPluginUpdater] commit-date:", "api", checkonly, limit_remaining, pluginnames[number-1], last_commit
+					
+					#fallback for limit_remaining or not use api
+					if int(limit_remaining) == 0 or config.plugins.githubpluginupdater.check_type.value.startswith("api") == False:
+						search_string = "<relative-time datetime="
 						pos1 = contents.find(search_string)
 						if pos1 > 0:
-							#print "=== found src on pos:", pos1
-							search_string = "<time-ago datetime="
-							pos2 = contents.find(search_string, pos1)
-							if pos2 > 0:
-								print "=====[GithubPluginUpdater] found time ago ==", pluginnames[number-1]
-								last_commit = str(contents[pos2+20:pos2+20+19])
+							print "[GithubPluginUpdater] found relative time:", checkType, checkonly, pluginnames[number-1], str(contents[pos1+25:pos1+25+19])
+							last_commit = str(contents[pos1+25:pos1+25+19])
+						else:
+							#print "===== not found relative-time ==", pluginnames[number-1]
+							if not config.plugins.githubpluginupdater.checkonly_src.value:
+								search_string = 'class="js-navigation-open" title="src" id='
+								pos1 = contents.find(search_string)
+							else:
+								pos1=1
+							if pos1 > 0:
+								#print "=== found src on pos:", pos1
+								search_string = "<time-ago datetime="
+								pos2 = contents.find(search_string, pos1)
+								if pos2 > 0:
+									print "[GithubPluginUpdater] found time ago:", checkType, checkonly, pluginnames[number-1], str(contents[pos2+20:pos2+20+19])
+									last_commit = str(contents[pos2+20:pos2+20+19])
+								else:
+									print "===== not found time ago for:", pluginnames[number-1]
+							else:
+								print "===== not found time-values for:", pluginnames[number-1]
 					
 					if last_local_commit < last_commit:
 						UpdateExist = True
 						UpdatePluginnames += "\n    - " + pluginnames[number-1]
+						print "[GithubPluginUpdater] new commit:", last_local_commit, last_commit, pluginnames[number-1]
 
 				if getContentCounter == getPageCounter:
+					print "[GithubPluginUpdater] UsedCheckType: %s %s, remaining: %s, ConfigCheckType: %s" % (checkType, checkonly, limit_remaining, config.plugins.githubpluginupdater.check_type.value)
 					getUpdateInfoMessage(MessageBox.TYPE_INFO)
 
 			except:
@@ -157,20 +206,24 @@ def getLastCommit(contents, number):
 
 def getUpdateInfoMessage(MessageBoxType = MessageBox.TYPE_INFO):
 
-					global UpdateExist
-					global session
-					global UpdatePluginnames
-					
-					if UpdateExist:
-						if config.plugins.githubpluginupdater.enable_autocheck.value != "False":
-							if config.plugins.githubpluginupdater.show_updatequestion.value == "False":
-								AddPopup("\n = GithubPluginUpdater = \n\n  >>> es liegen für folgende Plugins Updates vor !!! <<<\n  " + UpdatePluginnames + "\n\n\n  zum Update den GithubPluginUpdater öffnen",MessageBoxType , int(config.plugins.githubpluginupdater.popups_timeout.value),'GPU_PopUp_Update')
-							else:
-								if reload_value:
-									reload(GithubPluginUpdater)
-								from GithubPluginUpdater import UpdateInfo
-								session.open(UpdateInfo, UpdatePluginnames)
+			global UpdateExist
+			global session
+			global UpdatePluginnames
+			
+			if UpdateExist:
+				if config.plugins.githubpluginupdater.enable_autocheck.value != "False":
+					if config.plugins.githubpluginupdater.show_updatequestion.value == "False":
+						AddPopup("\n = GithubPluginUpdater = \n\n  >>> es liegen für folgende Plugins Updates vor !!! <<<\n  " + UpdatePluginnames + "\n\n\n  zum Update den GithubPluginUpdater öffnen",MessageBoxType , int(config.plugins.githubpluginupdater.popups_timeout.value),'GPU_PopUp_Update')
 					else:
-						if config.plugins.githubpluginupdater.enable_autocheck.value == "True":
-							AddPopup("\n = GithubPluginUpdater = \n\n  keine Plugin-Updates gefunden",MessageBoxType, int(config.plugins.githubpluginupdater.popups_timeout.value),'GPU_PopUp_Update')
-					
+						if reload_value:
+							reload(GithubPluginUpdater)
+						from GithubPluginUpdater import UpdateInfo
+						session.open(UpdateInfo, UpdatePluginnames)
+			else:
+				if config.plugins.githubpluginupdater.enable_autocheck.value == "True":
+					AddPopup("\n = GithubPluginUpdater = \n\n  keine Plugin-Updates gefunden",MessageBoxType, int(config.plugins.githubpluginupdater.popups_timeout.value),'GPU_PopUp_Update')
+			
+			#set lastAutoCheckTime
+			config.plugins.githubpluginupdater.lastAutoCheck.value = int(time.time())
+			config.plugins.githubpluginupdater.lastAutoCheck.save()
+

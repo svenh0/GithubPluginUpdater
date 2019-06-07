@@ -16,7 +16,7 @@ from Components.Label import Label
 from Components.ScrollLabel import ScrollLabel
 from Components.Sources.StaticText import StaticText
 from Components.ActionMap import ActionMap, HelpableActionMap
-from pprint import pprint
+#from pprint import pprint
 
 # GUI (System) 
 from enigma import eTimer, ePoint, eSize, getDesktop, ePoint
@@ -32,17 +32,26 @@ import Screens.Standby
 import os, sys, traceback
 import subprocess
 import time
+import datetime
 import GithubPluginUpdater_Setup
+
+try:
+	import simplejson as json
+except ImportError:
+	import json
 
 PluginVersion = ""
 counter = 0
-reload_value = False
+reload_value = True
+
+limit_remaining = 60
+limit_resetTime = 0
 
 pluginnames = ['SerienRecorder',
-							'SeriesPlugin',
-							'InfoBarTunerState',
-							'EnhancedMovieCenter',
-							'GithubPluginUpdater']
+						'SeriesPlugin',
+						'InfoBarTunerState',
+						'EnhancedMovieCenter',
+						'GithubPluginUpdater']
 
 #default commit_date for load config-values
 lastgithubcommits = [ '', '', '', '', '']
@@ -57,57 +66,57 @@ last_commit_info   = ["", "", "", "", ""]
 local_versions = ["", "", "", "", ""]
 
 pluginsfolder = ['serienrecorder',
-								 'SeriesPlugin',
-								 'InfoBarTunerState',
-								 'EnhancedMovieCenter',
-								 'GithubPluginUpdater']
+						 'SeriesPlugin',
+						 'InfoBarTunerState',
+						 'EnhancedMovieCenter',
+						 'GithubPluginUpdater']
 
 filenames = [ '/usr/lib/enigma2/python/Plugins/Extensions/serienrecorder/SerienRecorderHelpers.py',
-							'/usr/lib/enigma2/python/Plugins/Extensions/SeriesPlugin/plugin.py',
-							'/usr/lib/enigma2/python/Plugins/Extensions/InfoBarTunerState/plugin.py',
-							'/usr/lib/enigma2/python/Plugins/Extensions/EnhancedMovieCenter/EnhancedMovieCenter.py',
-							'/usr/lib/enigma2/python/Plugins/Extensions/GithubPluginUpdater/plugin.py']
+						'/usr/lib/enigma2/python/Plugins/Extensions/SeriesPlugin/plugin.py',
+						'/usr/lib/enigma2/python/Plugins/Extensions/InfoBarTunerState/plugin.py',
+						'/usr/lib/enigma2/python/Plugins/Extensions/EnhancedMovieCenter/EnhancedMovieCenter.py',
+						'/usr/lib/enigma2/python/Plugins/Extensions/GithubPluginUpdater/plugin.py']
 
 githuburls = [ 'https://raw.githubusercontent.com/einfall/serienrecorder/master/src/SerienRecorderHelpers.py',
-							 'https://raw.githubusercontent.com/betonme/e2openplugin-SeriesPlugin/master/src/plugin.py',
-							 'https://raw.githubusercontent.com/betonme/e2openplugin-InfoBarTunerState/master/src/plugin.py',
-							 'https://raw.githubusercontent.com/betonme/e2openplugin-EnhancedMovieCenter/master/src/EnhancedMovieCenter.py',
-							 'https://raw.githubusercontent.com/svenh0/GithubPluginUpdater/master/src/plugin.py']
+						 'https://raw.githubusercontent.com/betonme/e2openplugin-SeriesPlugin/master/src/plugin.py',
+						 'https://raw.githubusercontent.com/betonme/e2openplugin-InfoBarTunerState/master/src/plugin.py',
+						 'https://raw.githubusercontent.com/betonme/e2openplugin-EnhancedMovieCenter/master/src/EnhancedMovieCenter.py',
+						 'https://raw.githubusercontent.com/svenh0/GithubPluginUpdater/master/src/plugin.py']
 
 githubcommiturls = [ 'https://github.com/einfall/serienrecorder',
-							 'https://github.com/betonme/e2openplugin-SeriesPlugin',
-							 'https://github.com/betonme/e2openplugin-InfoBarTunerState',
-							 'https://github.com/betonme/e2openplugin-EnhancedMovieCenter',
-							 'https://github.com/svenh0/GithubPluginUpdater']
+						 'https://github.com/betonme/e2openplugin-SeriesPlugin',
+						 'https://github.com/betonme/e2openplugin-InfoBarTunerState',
+						 'https://github.com/betonme/e2openplugin-EnhancedMovieCenter',
+						 'https://github.com/svenh0/GithubPluginUpdater']
 
 githubcommitlisturls = [ 'einfall/serienrecorder',
-							 'betonme/e2openplugin-SeriesPlugin',
-							 'betonme/e2openplugin-InfoBarTunerState',
-							 'betonme/e2openplugin-EnhancedMovieCenter',
-							 'svenh0/GithubPluginUpdater']
+						 'betonme/e2openplugin-SeriesPlugin',
+						 'betonme/e2openplugin-InfoBarTunerState',
+						 'betonme/e2openplugin-EnhancedMovieCenter',
+						 'svenh0/GithubPluginUpdater']
 
 gitzipurls = [ 'https://github.com/einfall/serienrecorder/archive/master.zip',
-							 'https://github.com/betonme/e2openplugin-SeriesPlugin/archive/master.zip',
-							 'https://github.com/betonme/e2openplugin-InfoBarTunerState/archive/master.zip',
-							 'https://github.com/betonme/e2openplugin-EnhancedMovieCenter/archive/master.zip',
-							 'https://github.com/svenh0/GithubPluginUpdater/archive/master.zip']
+						 'https://github.com/betonme/e2openplugin-SeriesPlugin/archive/master.zip',
+						 'https://github.com/betonme/e2openplugin-InfoBarTunerState/archive/master.zip',
+						 'https://github.com/betonme/e2openplugin-EnhancedMovieCenter/archive/master.zip',
+						 'https://github.com/svenh0/GithubPluginUpdater/archive/master.zip']
 
 gitzip_folder = [ 'serienrecorder-master',
-									'e2openplugin-SeriesPlugin-master',
-									'e2openplugin-InfoBarTunerState-master',
-									'e2openplugin-EnhancedMovieCenter-master',
-									'GithubPluginUpdater-master']
+						'e2openplugin-SeriesPlugin-master',
+						'e2openplugin-InfoBarTunerState-master',
+						'e2openplugin-EnhancedMovieCenter-master',
+						'GithubPluginUpdater-master']
 
 search_strings = [ 'SRVERSION = ',
-									 'VERSION = ',
-									 'VERSION = ',
-									 'EMCVersion = ',
-									 'VERSION = ']
+						 'VERSION = ',
+						 'VERSION = ',
+						 'EMCVersion = ',
+						 'VERSION = ']
 
 color_strings = [ 'red',
-									 'green',
-									 'yellow',
-									 'blue']
+						 'green',
+						 'yellow',
+						 'blue']
 
 sz_w = getDesktop(0).size().width()
 
@@ -116,9 +125,14 @@ class UpdateScreen(Screen, HelpableScreen):
 	
 	if sz_w == 1920:
 		skin = """
-		<screen name="GithubPluginUpdater" position="center,center" size="1200,680">
-			<widget name="myLabel" position="15,10" size="1100,80" font="Regular;24"/>
-			<eLabel text="Menü" position="1080,20" size="90,30" backgroundColor="#777777" halign="center" font="Regular;24"/>
+		<screen name="GithubPluginUpdater_v2" position="center,center" size="1200,680">
+			<widget name="myLabel" position="15,10" size="650,80" font="Regular;24"/>
+			
+			<widget source="global.CurrentTime" render="Label" position="700,15" size="475,40" font="Regular;32" halign="right">
+				<convert type="ClockToText">Format:%A %d.%m.  %H:%M</convert>
+			</widget>
+
+			<eLabel text="Menü" position="1080,60" size="90,30" backgroundColor="#777777" halign="center" font="Regular;24"/>
 
 			<eLabel text="(lokale Version)" position="440,80" size="300,50" font="Regular;32" foregroundColor="#FFFF00"/>
 			<eLabel text="(github Version)" position="720,80" size="300,50" font="Regular;32" foregroundColor="#FFFF00"/>
@@ -152,13 +166,18 @@ class UpdateScreen(Screen, HelpableScreen):
 			<widget name="myplugin4_git_date" position="720,490" size="270,40" font="Regular;24"/>
 
 			<eLabel text="Status:" position="15,575" size="115,50" font="Regular;32" foregroundColor="#FFFF00"/>
-			<widget name="status_txt" position="130,575" size="960,50" font="Regular;32"/>
+			<widget name="status_txt" position="130,575" size="960,100" font="Regular;32"/>
 		</screen>"""
 	else:
 		skin = """
-		<screen name="GithubPluginUpdater" position="center,center" size="930,520">
-			<widget name="myLabel" position="15,20" size="700,50" font="Regular;18"/>
-			<eLabel text="Menü" position="850,20" size="70,20" backgroundColor="#777777" halign="center" font="Regular;18"/>
+		<screen name="GithubPluginUpdater_v2" position="center,center" size="930,520">
+			<widget name="myLabel" position="15,20" size="500,50" font="Regular;18"/>
+
+			<widget source="global.CurrentTime" render="Label" position="540,20" size="380,30" font="Regular;24" halign="right">
+				<convert type="ClockToText">Format:%A %d.%m.  %H:%M</convert>
+			</widget>
+			
+			<eLabel text="Menü" position="850,60" size="70,20" backgroundColor="#777777" halign="center" font="Regular;18"/>
 
 			<eLabel text="(lokale Version)" position="320,80" size="200,30" font="Regular;24" foregroundColor="#FFFF00"/>
 			<eLabel text="(github Version)" position="550,80" size="200,30" font="Regular;24" foregroundColor="#FFFF00"/>
@@ -192,21 +211,20 @@ class UpdateScreen(Screen, HelpableScreen):
 			<widget name="myplugin4_git_date" position="550,390" size="200,40" font="Regular;18"/>
 
 			<eLabel text="Status:" position="15,450" size="90,30" font="Regular;24" foregroundColor="#FFFF00"/>
-			<widget name="status_txt" position="110,450" size="790,30" font="Regular;24"/>
+			<widget name="status_txt" position="110,450" size="790,60" font="Regular;24"/>
 		</screen>"""
-
 	
-	def __init__(self, session, args = 0):
+	def __init__(self, session):
 		self.session = session
 		Screen.__init__(self, session)
 		HelpableScreen.__init__(self)
-		
+
 		try:
 			self["myLabel"] = Label("")
 			global PluginVersion
 			from plugin import VERSION
 			PluginVersion = VERSION
-			self.skinName = "GithubPluginUpdater"
+			self.skinName = "GithubPluginUpdater_v2"
 			
 			global pluginnames, filenames, color_strings
 
@@ -224,18 +242,18 @@ class UpdateScreen(Screen, HelpableScreen):
 			
 			self["myActionMap"] = ActionMap(["GithubPluginUpdaterActions"],
 				{
-						"ok"    		 : self.keyOK,
+						"ok" 			 : self.keyOK,
 						"cancel"		 : self.cancel,
 						"info"  		 : self.checkSelfUpdate,
-						"info_lang"	 : boundFunction(self.showExtCommitInfo, 5),
+						"info_lang"	 	 : boundFunction(self.showExtCommitInfo, 5),
 						"menu"  		 : self.menu
-				},-1)
+				},-2)
 			
 			if os.path.isfile(filenames[0]):
 				self["myActionMap1"] = ActionMap(["GithubPluginUpdaterActions"],
 					{
 						"red"   		 : boundFunction(self.runUpdateScript, 1),
-						"red_long"   : boundFunction(self.runUpdateScript, 1, True),
+						"red_long"   	 : boundFunction(self.runUpdateScript, 1, True),
 						"1"    			 : boundFunction(self.showCommitInfo, 1),
 						"1_long"		 : boundFunction(self.showExtCommitInfo, 1)
 					},-1)
@@ -244,7 +262,7 @@ class UpdateScreen(Screen, HelpableScreen):
 				self["myActionMap2"] = ActionMap(["GithubPluginUpdaterActions"],
 					{
 						"green" 		 : boundFunction(self.runUpdateScript, 2),
-						"green_long" : boundFunction(self.runUpdateScript, 2, True),
+						"green_long" 	 : boundFunction(self.runUpdateScript, 2, True),
 						"2"     		 : boundFunction(self.showCommitInfo, 2),
 						"2_long"		 : boundFunction(self.showExtCommitInfo, 2)
 					},-1)
@@ -253,7 +271,7 @@ class UpdateScreen(Screen, HelpableScreen):
 				self["myActionMap3"] = ActionMap(["GithubPluginUpdaterActions"],
 					{
 						"yellow"		 : boundFunction(self.runUpdateScript, 3),
-						"yellow_long": boundFunction(self.runUpdateScript, 3, True),
+						"yellow_long" 	 : boundFunction(self.runUpdateScript, 3, True),
 						"3"     		 : boundFunction(self.showCommitInfo, 3),
 						"3_long"		 : boundFunction(self.showExtCommitInfo, 3)
 					},-1)
@@ -262,7 +280,7 @@ class UpdateScreen(Screen, HelpableScreen):
 				self["myActionMap4"] = ActionMap(["GithubPluginUpdaterActions"],
 					{
 						"blue"  		 : boundFunction(self.runUpdateScript, 4),
-						"blue_long"  : boundFunction(self.runUpdateScript, 4, True),
+						"blue_long" 	 : boundFunction(self.runUpdateScript, 4, True),
 						"4"     		 : boundFunction(self.showCommitInfo, 4),
 						"4_long"		 : boundFunction(self.showExtCommitInfo, 4)
 					},-1)
@@ -299,16 +317,16 @@ class UpdateScreen(Screen, HelpableScreen):
 			self.getCommitCounter = 0
 			self.getContentWithError = False
 			self.showUpdateMsgBox = False
-			self.onShown.append(self.loadPages)
+			self.checkType=""
+		
+			self.onShown.append(self.loadLimitRemaining)
 			self.onLayoutFinish.append( self.LayoutFinish )
 
 		except:
 			import traceback
 			traceback.print_exc()
 
-
 	def LayoutFinish(self):
-			
 			self.setTitle("GithubPluginUpdater - " + PluginVersion)
 			self["myLabel"].setText(_("zum Neuladen der github-Versionen 'OK' drücken\nTasten 1-4 zur Anzeige der letzten Github-Update-Info"))
 
@@ -330,6 +348,7 @@ class UpdateScreen(Screen, HelpableScreen):
 			global PluginVersion
 			global last_commit_info
 			global last_commit #commitdate
+			global last_local_commit
 			
 			gpu_version=""
 			search_string = "VERSION = "
@@ -372,7 +391,7 @@ class UpdateScreen(Screen, HelpableScreen):
 
 			else:
 				message_txt += "\ngithub Version: " + gpu_version + " (" + last_commit[4] + ")\n"
-				message_txt += "lokale Version:  " + local_version + "\n\n"
+				message_txt += "lokale Version:  " + local_version + " (" + config.plugins.githubpluginupdater.lastcommit[pluginnames[4]].value + ")\n\n"
 				message_txt += "Es wird bereits die aktuellste Version genutzt!                        \n "
 				if self.showUpdateMsgBox == False:
 					self.session.open(MessageBox, message_txt, MessageBox.TYPE_INFO)
@@ -399,6 +418,7 @@ class UpdateScreen(Screen, HelpableScreen):
 			self.gpu_force_install = force_install
 			
 			url = githuburls[4]
+			#print "[GithubPluginUpdater] checkSelfUpdate url", url
 			self.deferred = getPage(url, timeout=7)
 			self.deferred.addCallback(self.getGPUVersion)
 			self.deferred.addErrback(self.getGPUVersionErrorHandler)
@@ -410,10 +430,13 @@ class UpdateScreen(Screen, HelpableScreen):
 
 	def keyOK(self):
 			
+			global limit_remaining
+			
 			self.reloadGitVersion = True
 			self.reloadLocalVersion = True
 			self.updateExist = False
-			self.loadPages()
+			last_commit   = ["", "", "", "", ""]
+			self.loadLimitRemaining()
 
 	def showExtCommitInfo(self, number):
 			
@@ -442,25 +465,20 @@ class UpdateScreen(Screen, HelpableScreen):
 	def getLastCommitInfo(self, contents):
 
 			updateinfo = ""
-			pos1 = contents.find('class="commit-author')
-			if pos1 > 0:
-				pos2 = contents.find('class="message" data-pjax="true" title="',pos1+len('class="commit-author') )
-				if pos2 > 0:
-					pos3 = contents.find('">',pos2+len('class="message" data-pjax="true" title="') )
-					updateinfo = str(contents[pos2+len('class="message" data-pjax="true" title="'):pos3])
-			else:
-					search_string = 'class="js-navigation-open" title="src" id='
-					pos1 = contents.find(search_string)
-					if pos1 > 0:
-						pos2 = contents.find('<a data-pjax="true" title="',pos1)
-						if pos2 > 0:
-							pos3 = contents.find('" class=',pos2+len('<a data-pjax="true" title="') )
-							updateinfo = str(contents[pos2+len('<a data-pjax="true" title="'):pos3])
-							try:
-								from HTMLParser import HTMLParser
-								updateinfo = HTMLParser().unescape(updateinfo)
-							except:
-								pass
+			pos2 = contents.find('<a data-pjax="true" title="',pos1)
+			if pos2 > 0:
+				if config.plugins.githubpluginupdater.checkonly_src.value:
+					pos3 = contents.find('" class=',pos2+len('<a data-pjax="true" title="') )
+					updateinfo = str(contents[pos2+len('<a data-pjax="true" title="'):pos3])
+				else:
+					pos3 = contents.find('" class=',pos2+len('<a data-pjax="true" title="') )
+					updateinfo = str(contents[pos2+len('<a data-pjax="true" title="'):pos3])
+				try:
+					from HTMLParser import HTMLParser
+					updateinfo = HTMLParser().unescape(updateinfo)
+				except:
+					print "=== [GithubPluginUpdater] getLastCommitInfo - error html parser", updateinfo
+					pass
 			
 			return updateinfo
 
@@ -513,11 +531,11 @@ class UpdateScreen(Screen, HelpableScreen):
 			global lastgithubcommits
 
 			check_curl = subprocess.check_output("opkg list-installed curl", shell=True)
-			print "=====[GithubPluginUpdater] cmd-output curl ===: ", check_curl
+			#print "[GithubPluginUpdater] cmd-output curl ===: ", check_curl
 
 			if not check_curl:
 				check_wget = subprocess.check_output("opkg list-installed wget", shell=True)
-				print "=====[GithubPluginUpdater] cmd-output wget ===: ", check_wget
+				#print "=====[GithubPluginUpdater] cmd-output wget ===: ", check_wget
 
 			if not check_curl and not check_wget:
 				self.session.open(MessageBox, "Das Update konnte nicht gestartet werden!\n\nEs muss erst das curl-Paket installiert werden.\n\nDas curl-Paket kann im Plugin per Menü-Taste über den Eintrag 'curl-Paket auf der Box installieren' installiert werden!.\n\n\nper Telnet geht es z.B. mit folgendem Befehl:\n\n opkg install curl", MessageBox.TYPE_INFO)
@@ -536,16 +554,15 @@ class UpdateScreen(Screen, HelpableScreen):
 				self.runUpdate = True
 				
 				cmd = self.getConsoleCmd(number)
-				#print "=======\n", cmd
 				self.session.open(Console,_("GithubPluginUpdater") + " (" + PluginVersion + ")",[cmd])
 				
 				if number != 5:
 					config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value = last_commit[number-1]
+					print "[GithubPluginUpdater] set lastcommit new: %s, old: %s" % (last_commit[number-1], config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value)
 					config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].save()
 					config.plugins.githubpluginupdater.save()
 				else:
 					if self.showUpdateMsgBox:
-						#print "=== opend box ==="
 						self.msg.close()
 						self.msg = None
 			
@@ -570,32 +587,73 @@ class UpdateScreen(Screen, HelpableScreen):
 				backuplocation = os.path.join(self.backuplocation, 'backup/')
 			return backuplocation
 
+	def loadLimitRemaining(self):
+		
+		global githuburls
+		global pluginnames
+		global last_commit
+		global limit_remaining
+		
+		limit_remaining=60
+		
+		for i in range(len(githuburls)):
+			#read LocalVersion
+			if self.reloadLocalVersion == True:
+				self.getLocalVersion(pluginnames[i],i+1)
+		self.reloadLocalVersion = False
+		
+		if config.plugins.githubpluginupdater.check_type.value.startswith("api"):
+			#load rate limit at first if check with api
+			headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36',}
+			url = "https://api.github.com/rate_limit"
+			self.deferred = getPage(url, timeout=5, headers=headers)
+			self.deferred.addCallback(self.loadLimitRemaining_getWebContent)
+			self.deferred.addErrback(self.errorHandler, 0)
+		else:
+			self.loadPages()
+
+	def loadLimitRemaining_getWebContent(self, contents):
+	
+		contents = json.loads(contents)
+		global limit_remaining, limit_resetTime
+		limit_remaining = contents['rate']['remaining']
+		limit_resetTime = contents['rate']['reset']
+		
+		if self.reloadGitVersion == False:
+			status_txt = self["status_txt"].getText()
+			resetTime = datetime.datetime.fromtimestamp(float(limit_resetTime)).strftime("%d.%m.%Y, %H:%M")
+			status_txt = status_txt[:status_txt.rindex("\n") + 1 ] + "(Rest Abfrage-Limit: %s, Limit-Reset-Time: %s)" % (str(limit_remaining), resetTime) 
+				
+			self["status_txt"].setText(status_txt)
+			use_src = "main"
+			if config.plugins.githubpluginupdater.checkonly_src.value:
+				use_src = "src"
+			print "[GithubPluginUpdater] UsedCheckType: %s %s, remaining: %s, ConfigCheckType: %s" % (self.checkType, use_src, limit_remaining, config.plugins.githubpluginupdater.check_type.value)
+			return
+		
+		self.loadPages()
 
 	def loadPages(self):
 			
-			if self.reloadGitVersion == False:
-				return
-			
-			global githuburls
-			global pluginnames
-
-			self.getContentCounter = 0
-			self.getPageCounter = 0
-			self.getContentWithError = False
-
+		global githuburls
+		global pluginnames
+		
+		self.getContentCounter = 0
+		self.getPageCounter = 0
+		self.getContentWithError = False
+		
+		if self.reloadGitVersion == True:
 			for i in range(len(githuburls)):
-				if self.reloadLocalVersion == True:
-					self.getLocalVersion(pluginnames[i],i+1)
+				#lade Github-Version für GPU und installierte Plugins
 				if i == 4 or self["myplugin" + str(i+1) + "_lokal_version"].getText():
 					self.getPage(githuburls[i], i+1)
-			
-			self.reloadGitVersion = False
-			self.reloadLocalVersion = False
+		
+		self.reloadGitVersion = False
 
 
 	def getPage(self, url, number):
 
-			self["status_txt"].setText("lade github-Versionen ...")
+			self["status_txt"].setText("lade github-Versionen ...\n")
 
 			self.getPageCounter += 2
 			
@@ -607,76 +665,139 @@ class UpdateScreen(Screen, HelpableScreen):
 				self["myplugin" + str(number) + "_git_date"].setText("(...)")
 				self["myplugin" + str(number) + "_update"].hide()
 			
+			#print "=====[GithubPluginUpdater] getPage: ", url
+			
+			#1. load gitVersionsString
 			self.deferred = getPage(url, timeout=5)
 			self.deferred.addCallback(self.getWebContent, number)
 			self.deferred.addErrback(self.errorHandler, number)
 
-			url = githubcommiturls[number-1]
-			self.deferred = getPage(url, timeout=5)
+			global limit_remaining, limit_resetTime
+			#2. load last commit-date and commit-info-text
+			if int(limit_remaining) >0 and config.plugins.githubpluginupdater.check_type.value.startswith("api"):
+				if config.plugins.githubpluginupdater.checkonly_src.value:
+					url = "https://api.github.com/repos/" + githubcommitlisturls[number-1] + "/commits?callback=commits&path=src&page=1&per_page=1"
+				else:
+					url = "https://api.github.com/repos/" + githubcommitlisturls[number-1] + "/commits?callback=commits&page=1&per_page=1"
+				self.checkType = "api"
+			
+			elif (int(limit_remaining) == 0 and config.plugins.githubpluginupdater.check_type.value == "api-normal") or config.plugins.githubpluginupdater.check_type.value == "normal":
+				url = githubcommiturls[number-1]
+				if config.plugins.githubpluginupdater.checkonly_src.value:
+					url += "/tree/master/src" # check only src-folder
+				self.checkType = "normal"
+			
+			elif config.plugins.githubpluginupdater.check_type.value in ("commits","api-commits"):
+				url = githubcommiturls[number-1] + "/commits/master"
+				if config.plugins.githubpluginupdater.checkonly_src.value:
+					url += "/src" # check only src-folder
+				self.checkType = "commits"
+
+			#print "=====[GithubPluginUpdater]", limit_remaining, url
+			headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36',}
+			self.deferred = getPage(url, timeout=10, headers=headers)
 			self.deferred.addCallback(self.getLastCommit, number)
 			self.deferred.addErrback(self.errorHandler, number)
-
 
 	def errorHandler(self, result, number):
 			
 			self.getContentCounter += 1
 			self.getContentWithError = True
-			print "=====[GithubPluginUpdater] getContentError: ", number, result
-
+			print "[GithubPluginUpdater] getContentError: ", number, result
 			self.checkIfLastPage()
 
-
+	#load github-Versions-String
 	def getWebContent(self, contents, number):
 			
 			self.getContentCounter += 1
-
-			pos1 = contents.find(search_strings[number-1])
-			if pos1 > 0:
-				pos2 = contents.find("\n",pos1+len(search_strings[number-1]))
-				git_version = str(contents[pos1:pos2])
-				git_version = git_version.replace(search_strings[number-1],"")
-				git_version = git_version.replace("'","")
-				git_version = git_version.replace('"',"")
-				#set github version in the screen
-				if number !=5:
-					self["myplugin" + str(number) + "_git_version"].setText(git_version)
+			
+			if number == 0:
+				contents = json.loads(contents)
+				
+				#print "=== contents: ", contents
+				
+				global limit_remaining, limit_resetTime
+				limit_remaining = contents['rate']['remaining']
+				limit_resetTime = contents['rate']['reset']
+				
+			else:
+				pos1 = contents.find(search_strings[number-1])
+				if pos1 > 0:
+					pos2 = contents.find("\n",pos1+len(search_strings[number-1]))
+					git_version = str(contents[pos1:pos2])
+					git_version = git_version.replace(search_strings[number-1],"")
+					git_version = git_version.replace("'","")
+					git_version = git_version.replace('"',"")
+					#set github version in the screen
+					if number !=5:
+						self["myplugin" + str(number) + "_git_version"].setText(git_version)
 
 			self.checkIfLastPage()
 
 
 	def getLastCommit(self, contents, number):
-			
+			#print "=====[GithubPluginUpdater] len(contents)", pluginnames[number-1]
 			try:
-
 				global pluginnames
 				global lastgithubcommits
 				global last_commit
 				global last_commit_info
+				global limit_remaining, limit_resetTime
 				
 				self.getContentCounter += 1
-				search_string = "<relative-time datetime="
 				
-				pos1=0
-				pos1 = contents.find(search_string)
-				if pos1 > 0:
-					print "=====[GithubPluginUpdater] found relative time ==", pluginnames[number-1]
-					last_commit[number-1] = str(contents[pos1+25:pos1+25+19])
-				else:
-					#print "===== not found relative-time ==", pluginnames[number-1]
-					search_string = 'class="js-navigation-open" title="src" id='
+				checkonly = "main"
+				if config.plugins.githubpluginupdater.checkonly_src.value: checkonly = "src"
+				
+				#check with api call
+				if int(limit_remaining) > 0 and config.plugins.githubpluginupdater.check_type.value.startswith("api"):
+					#print "=== API ==="
+					jsonp = contents
+					contents = jsonp[ jsonp.index("(") + 1 : jsonp.rindex(")") ]
+					commits = json.loads(contents)
+					#print "=== contents: ", commits['meta']
+					limit_remaining = commits['meta']['X-RateLimit-Remaining']
+					limit_resetTime = commits['meta']['X-RateLimit-Reset']
+					limit = commits['meta']['X-RateLimit-Limit']
+					
+					#print "=====[GithubPluginUpdater] limit_remaining ==", limit_remaining
+					if limit_remaining != "0":
+						commits = commits['data']
+						for commit in commits:
+							if commit:
+								#print "=== commit: ", commit
+								last_commit[number-1] = str(commit['commit']['author']['date'][:-1])
+								last_commit_info[number-1] = str(commit['commit']['message'])
+								#print "=== Commit-Info:", pluginnames[number-1], last_commit[number-1], last_commit_info[number-1]
+								print "[GithubPluginUpdater] commit-date:", "api", checkonly, limit_remaining, pluginnames[number-1], last_commit[number-1]
+				
+				#fallback for limit_remaining or not use api
+				if int(limit_remaining) == 0 or config.plugins.githubpluginupdater.check_type.value.startswith("api") == False:
+					#print "=== Fallback ==="
+					search_string = "<relative-time datetime="
+					pos1=0
 					pos1 = contents.find(search_string)
 					if pos1 > 0:
-						search_string = "<time-ago datetime="
-						pos1 = contents.find(search_string, pos1)
+						print "[GithubPluginUpdater] found relative time:", self.checkType, checkonly, pluginnames[number-1], str(contents[pos1+25:pos1+25+19])
+						last_commit[number-1] = str(contents[pos1+25:pos1+25+19])
+					else:
+						#print "===== not found relative-time ==", pluginnames[number-1]
+						if not config.plugins.githubpluginupdater.checkonly_src.value:
+							search_string = 'class="js-navigation-open" title="src" id='
+							pos1 = contents.find(search_string)
+						else:
+							pos=1
 						if pos1 > 0:
-							print "=====[GithubPluginUpdater] found time ago ==", pluginnames[number-1]
-							last_commit[number-1] = str(contents[pos1+20:pos1+20+19])
-				
-				#set last commit-info-text
-				last_commit_info[number-1] = self.getLastCommitInfo(contents)
+							search_string = "<time-ago datetime="
+							pos1 = contents.find(search_string, pos1)
+							if pos1 > 0:
+								print "[GithubPluginUpdater] found time ago:", self.checkType, checkonly, pluginnames[number-1], str(contents[pos1+20:pos1+20+19])
+								last_commit[number-1] = str(contents[pos1+20:pos1+20+19])
+					
+					#set last commit-info-text
+					last_commit_info[number-1] = self.getLastCommitInfo(contents)
 				
 				last_local_commit = config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value
-				
 				#print "===== local_Commit, last_commit: ", last_local_commit, last_commit[number-1], pluginnames[number-1]
 				
 				if number !=5:
@@ -687,7 +808,7 @@ class UpdateScreen(Screen, HelpableScreen):
 						self["myplugin" + str(number) + "_name"].instance.setForegroundColor(parseColor("red"))
 						self["myplugin" + str(number) + "_update"].show()
 						self.updateExist = True
-						print "=====[GithubPluginUpdater] new commit === local_Commit, last_commit: ", last_local_commit, last_commit[number-1], pluginnames[number-1]
+						print "[GithubPluginUpdater] new commit === local_Commit, last_commit: ", last_local_commit, last_commit[number-1], pluginnames[number-1]
 					else:
 						self["myplugin" + str(number) + "_git_version"].instance.setForegroundColor(parseColor("foreground"))
 						self["myplugin" + str(number) + "_lokal_version"].instance.setForegroundColor(parseColor("green"))
@@ -704,14 +825,27 @@ class UpdateScreen(Screen, HelpableScreen):
 
 	def checkIfLastPage(self):
 			
+			global limit_remaining
+			
 			if self.getContentCounter == self.getPageCounter:
+				status_txt = "github-Versionen geladen"
+				use_src = "main"
+				if config.plugins.githubpluginupdater.checkonly_src.value:
+					use_src = "src"
+				if len(self.checkType):
+					status_txt += " (%s-%s)" % (self.checkType, use_src)
 				if self.getContentWithError:
-					self["status_txt"].setText("github-Versionen wurden geladen (mit Fehler)")
+					status_txt += " - mit Fehler"
 				else:
 					if self.updateExist:
-						self["status_txt"].setText("github-Versionen wurden geladen - Updates vorhanden")
+						status_txt += " - Updates vorhanden"
 					else:
-						self["status_txt"].setText("github-Versionen wurden geladen - keine Updates vorhanden")
+						status_txt += " - keine Updates vorhanden"
+				
+				resetTime = datetime.datetime.fromtimestamp(float(limit_resetTime)).strftime("%d.%m.%Y, %H:%M")
+				status_txt += "\n(Rest Abfrage-Limit: %s, Limit-Reset-Time: %s)" % (str(limit_remaining), resetTime) 
+				self["status_txt"].setText(status_txt)
+				
 				self.getContentCounter = 0
 				self.getPageCounter = 0
 				self.getContentWithError = False
@@ -720,7 +854,13 @@ class UpdateScreen(Screen, HelpableScreen):
 					if self["myplugin" + str(i+1) + "_lokal_version"].getText() and not config.plugins.githubpluginupdater.lastcommit[pluginnames[i]].value:
 						self.session.open(MessageBox, 'Es existieren nicht für alle Plugins lokale github-Datumswerte, die zum Versionsvergleich genutzt werden.\nDaher werden diese Plugins automatisch als Update angeboten. Es gibt folgende Möglichkeiten erstmals ein lokales github-Datum zu speichern:\n\n1. wenn alle Plugins auf der Box tatsächlich aktuell sind, dann kann per Menü-Taste die Option "setze für alle Plugins das aktuelle github-Datum" gewählt werden\n\noder\n\n2. die jeweiligen Plugins können per Farb-Taste aktualisiert werden.\n\nDanach sollten alle Plugins als aktuell angezeigt werden.', MessageBox.TYPE_INFO)
 						break
-
+				
+				#reload Limit_Remaining to show in the status-text in the screen
+				headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36',}
+				url = "https://api.github.com/rate_limit"
+				self.deferred = getPage(url, timeout=5, headers=headers)
+				self.deferred.addCallback(self.loadLimitRemaining_getWebContent)
+				self.deferred.addErrback(self.errorHandler, 0)
 
 	def getLocalVersion(self, PluginName, number):
 		
@@ -796,6 +936,7 @@ class UpdateScreen(Screen, HelpableScreen):
 		
 		list.append(("--", ""))
 		check_curl = subprocess.check_output("opkg list-installed curl", shell=True)
+
 		if not check_curl:
 			list.append((_("curl-Paket auf der Box installieren"), "install_curl"))
 		else:
@@ -834,7 +975,8 @@ class UpdateScreen(Screen, HelpableScreen):
 				config.plugins.githubpluginupdater.save()
 				self.keyOK()
 			elif ret == "setallgitdate":
-				for i in range(4):
+				for i in range(5):
+					print "[GithubPluginUpdater] setlocalgithubdate for:", pluginnames[i], last_commit[i]
 					config.plugins.githubpluginupdater.lastcommit[pluginnames[i]].value = last_commit[i]
 					config.plugins.githubpluginupdater.lastcommit[pluginnames[i]].save()
 				config.plugins.githubpluginupdater.save()
@@ -924,6 +1066,11 @@ class UpdateScreen(Screen, HelpableScreen):
 			cmd += 'echo -e "\n  installierte Version vor der Backup-Wiederherstellung: $local_version"' + newLine
 			cmd += 'echo -e "\n  kopiere Backup-Dateien ......"' + newLine
 			cmd += 'cp -pr ' + self.backup_pluginPath + '/* /usr/lib/enigma2/python/Plugins/Extensions/' + pluginsfolder[number - 1] + '/' + newLine
+			if self.backup_pluginName == "SerienRecorder":
+				cmd += 'echo -e "\n  kopiere SerienRecorder-Datenbank ......"' + newLine
+				serienRecDataBaseFilePath = "%sSerienRecorder.db" % config.plugins.serienRec.databasePath.value
+				cmd += 'cp -pr ' + self.backup_pluginPath + '/database_backup/SerienRecorder.db ' + serienRecDataBaseFilePath + newLine
+				cmd += 'rm -rf /usr/lib/enigma2/python/Plugins/Extensions/' + pluginsfolder[number - 1] + '/database_backup' + newLine
 			cmd += "local_version=$(grep '" + search_strings[number - 1] + "' " + filenames[number - 1] + ')' + newLine
 			cmd += 'local_version=$(echo $local_version | sed "s/' + search_strings[number - 1] + '//")' + newLine
 			cmd += 'echo -e "\n  installierte Version nach der Backup-Wiederherstellung: $local_version"' + newLine
@@ -945,7 +1092,6 @@ class UpdateScreen(Screen, HelpableScreen):
 			config.plugins.githubpluginupdater.lastcommit[pluginnames[number - 1]].value = backup_datum
 			config.plugins.githubpluginupdater.lastcommit[pluginnames[number - 1]].save()
 			config.plugins.githubpluginupdater.save()
-
 
 	def cancel(self):
 			
@@ -1003,13 +1149,18 @@ class UpdateScreen(Screen, HelpableScreen):
 				cmd += '#echo -e "Pfad: ' + backupPath + '"' + newLine
 				cmd += "echo -e " + '"' + "\n  sichere lokale Version in: \n  '" + backupPath + "'......" + '"' + newLine
 				cmd += 'cp -pr /usr/lib/enigma2/python/Plugins/Extensions/' + pluginsfolder[number-1] + '/* ' + backupPath + newLine
+				if pluginname == "SerienRecorder":
+					cmd += "echo -e " + '"' + "\n  sichere SerienRecorder Datenbank ......" + '"' + newLine
+					cmd += 'mkdir -p ' + backupPath + 'database_backup/' + newLine
+					serienRecDataBaseFilePath = "%sSerienRecorder.db" % config.plugins.serienRec.databasePath.value
+					cmd += 'cp -pr ' + serienRecDataBaseFilePath + ' ' + backupPath + 'database_backup/' + newLine
 			
 			cmd += 'echo -e "\n  lade aktuelle Version von Github......"' + newLine
 
 			#== fuer die DMM-Variante mit curl:  curl gibt es als Paket im jeweiligen Feed unter www.dreamboxupdate.com =======
 			
 			UpdateZipFile = "Update_" + pluginname + ".zip"
-			cmd += 'wget -o /tmp/' + UpdateZipFile + ' ' + gitzipurls[number-1] + ' 2>/dev/null || curl -A "Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3" -o /tmp/' + UpdateZipFile + ' -sL ' + gitzipurls[number-1] + newLine
+			cmd += 'wget -O /tmp/' + UpdateZipFile + ' ' + gitzipurls[number-1] + ' 2>/dev/null || curl -A "Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3" -o /tmp/' + UpdateZipFile + ' -sL ' + gitzipurls[number-1] + newLine
 
 			cmd += 'echo -e "\n  installiere aktuelle Github-Version......"' + newLine
 			cmd += 'unzip -oq ' + UpdateZipFile + newLine
@@ -1101,19 +1252,59 @@ class showUpdateInfo(Screen):
 		self["text"].updateScrollbar()
 
 	def loadcommits(self):
-
+		
 		global githubcommitlisturls
 		
-		url = "https://api.github.com/repos/" + githubcommitlisturls[self.number-1] + "/commits"
+		if config.plugins.githubpluginupdater.checkonly_src.value:
+			url = "https://api.github.com/repos/" + githubcommitlisturls[self.number-1] + "/commits?callback=commits&path=src&page=1&per_page=10"
+		else:
+			url = "https://api.github.com/repos/" + githubcommitlisturls[self.number-1] + "/commits?callback=commits&page=1&per_page=10"
 		self.deferred = getPage(url, timeout=5, method="GET", headers={'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3',})
 		self.deferred.addCallback(self.getCommitsContent)
 		self.deferred.addErrback(self.errorHandler)
 
 	def errorHandler(self, result):
-			print "=====[GithubPluginUpdater] getContentError: ", result
+			print "[GithubPluginUpdater] getContentError: ", result
 			self["text"].setText(self.firstLineText + "Error\n\nEs konnte keine github-Update-Info ermittelt werden.")
 
+	def getCommitsResponse(self, contents):
+
+		from twisted.web.client import readBody
+
+		#print 'contents:', contents
+		print 'Response version:', contents.version
+		print 'Response code:', contents.code
+		print 'Response phrase:', contents.phrase
+		
+		#print 'Response headers:'
+		#print "== heraders1: \n", list(contents.headers.getAllRawHeaders())
+		headers = list(contents.headers.getAllRawHeaders())
+		
+		global limit_remaining, limit_resetTime
+		
+		for header in headers:
+			#print "=== header: ", header
+			if header[0] == "X-Ratelimit-Remaining":
+				limit_remaining = header[1][0]
+			if header[0] == "X-Ratelimit-Reset":
+				limit_resetTime = header[1][0]
+		
+		#print "=== limit remaining: ", limit_remaining
+		#print "=== limit reset:     ", limit_resetTime
+		resetTime = datetime.datetime.fromtimestamp(float(limit_resetTime)).strftime("%d.%m.%Y, %H:%M")
+		#print "=== reset Time: ", resetTime
+
+		if contents.code == 304:
+			self["text"].setText(self.firstLineText + "Error\n\nEs konnte keine github-Update-Info ermittelt werden.")
+			return #no modified page since last local saved commit-date
+		
+		#read body
+		self.deferred = readBody(contents)
+		self.deferred.addCallback(self.getCommitsContent)
+
 	def getCommitsContent(self, contents):
+		
+		#print "commitsContent:", contents
 		
 		try:
 			import simplejson as json
@@ -1121,12 +1312,34 @@ class showUpdateInfo(Screen):
 			import json
 		
 		try:
+			jsonp = contents
+			contents = jsonp[ jsonp.index("(") + 1 : jsonp.rindex(")") ]
+
 			commits = json.loads(contents)
+
+			global limit_remaining, limit_resetTime
+			limit_remaining = commits['meta']['X-RateLimit-Remaining']
+			limit_resetTime = commits['meta']['X-RateLimit-Reset']
+			limit						= commits['meta']['X-RateLimit-Limit']
+			
+			if limit_remaining == "0":
+				text =  self.firstLineText + _("\nDie erweiterte Update-Info konnte nicht geladen werden.\nDas stündliche Limit für github-Abfragen wurde erreicht!!\n")
+				text += "\nAbfrage-Limit pro Stunde:	  " + str(limit)
+				text += "\nRestliches Abfrage-Limit:	  " + str(limit_remaining)
+				text += "\nLimit-Reset-Time: 	  " + str(datetime.datetime.fromtimestamp(float(limit_resetTime)).strftime("%d.%m.%Y, %H:%M:%S"))
+				text += "\naktuelle Zeit:     	  " + str(time.strftime("%d.%m.%Y, %H:%M:%S", time.localtime()))
+				text += "\nWartezeit bis Reset: 	  " + str((datetime.datetime.fromtimestamp(float(limit_resetTime)) - datetime.datetime.now()).seconds/60) + " min"
+				text += _("\n\n\nExit-Taste zum Beenden")
+				self.setText(text)
+				return
+
+			commits = commits['data']
 			
 			text = ""
 			sepLine = "="*44
 			for commit in commits:
 				if commit:
+					#print "=== commit: ", commit
 					date  	= commit['commit']['author']['date'][:-1]
 					author	= commit['commit']['author']['name']
 					message = str(commit['commit']['message'])
@@ -1160,5 +1373,4 @@ class showUpdateInfo(Screen):
 		self.setText(text)
 		
 		self.loadcommits()
-
 
