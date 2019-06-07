@@ -465,7 +465,7 @@ class UpdateScreen(Screen, HelpableScreen):
 	def getLastCommitInfo(self, contents):
 
 			updateinfo = ""
-			pos2 = contents.find('<a data-pjax="true" title="',pos1)
+			pos2 = contents.find('<a data-pjax="true" title="',0)
 			if pos2 > 0:
 				if config.plugins.githubpluginupdater.checkonly_src.value:
 					pos3 = contents.find('" class=',pos2+len('<a data-pjax="true" title="') )
