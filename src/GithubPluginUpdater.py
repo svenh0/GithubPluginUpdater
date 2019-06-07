@@ -556,12 +556,12 @@ class UpdateScreen(Screen, HelpableScreen):
 				cmd = self.getConsoleCmd(number)
 				self.session.open(Console,_("GithubPluginUpdater") + " (" + PluginVersion + ")",[cmd])
 				
-				if number != 5:
-					config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value = last_commit[number-1]
-					print "[GithubPluginUpdater] set lastcommit new: %s, old: %s" % (last_commit[number-1], config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value)
-					config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].save()
-					config.plugins.githubpluginupdater.save()
-				else:
+				config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value = last_commit[number-1]
+				print "[GithubPluginUpdater] set lastcommit new: %s, old: %s" % (last_commit[number-1], config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].value)
+				config.plugins.githubpluginupdater.lastcommit[pluginnames[number-1]].save()
+				config.plugins.githubpluginupdater.save()
+				
+				if number == 5:
 					if self.showUpdateMsgBox:
 						self.msg.close()
 						self.msg = None
