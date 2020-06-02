@@ -7,8 +7,10 @@ from Components.config import *
 # Screen
 from Screens.Screen import Screen
 from Screens.Console import Console
-from Screens.MessageBox import MessageBox
-from Screens.ChoiceBox import ChoiceBox
+#from Screens.MessageBox import MessageBox
+#from Screens.ChoiceBox import ChoiceBox
+from GithubPluginUpdaterMessage import MessageBoxGPU as MessageBox
+from GithubPluginUpdaterMessage import ChoiceBoxGPU as ChoiceBox
 from Screens.HelpMenu import HelpableScreen
 from skin import parseColor
 
@@ -16,7 +18,6 @@ from Components.Label import Label
 from Components.ScrollLabel import ScrollLabel
 from Components.Sources.StaticText import StaticText
 from Components.ActionMap import ActionMap, HelpableActionMap
-#from pprint import pprint
 
 # GUI (System) 
 from enigma import eTimer, ePoint, eSize, getDesktop, ePoint
@@ -24,7 +25,6 @@ from enigma import eTimer, ePoint, eSize, getDesktop, ePoint
 from socket import timeout
 from twisted.web.client import getPage
 
-from Tools.Notifications import AddPopup
 from Tools.BoundFunction import boundFunction
 from Tools.Directories import fileExists, resolveFilename, SCOPE_PLUGINS
 
@@ -40,6 +40,12 @@ try:
 except ImportError:
 	import json
 
+try:
+	from enigma import eMediaDatabase
+	isDreamOS = True
+except:
+	isDreamOS = False
+
 PluginVersion = ""
 counter = 0
 reload_value = True
@@ -47,11 +53,11 @@ reload_value = True
 limit_remaining = 60
 limit_resetTime = 0
 
-pluginnames = ['SerienRecorder',
-						'SeriesPlugin',
-						'InfoBarTunerState',
-						'EnhancedMovieCenter',
-						'GithubPluginUpdater']
+pluginnames = 	['SerienRecorder',
+				'SeriesPlugin',
+				'InfoBarTunerState',
+				'EnhancedMovieCenter',
+				'GithubPluginUpdater']
 
 #default commit_date for load config-values
 lastgithubcommits = [ '', '', '', '', '']
@@ -66,28 +72,28 @@ last_commit_info   = ["", "", "", "", ""]
 local_versions = ["", "", "", "", ""]
 
 pluginsfolder = ['serienrecorder',
-						 'SeriesPlugin',
-						 'InfoBarTunerState',
-						 'EnhancedMovieCenter',
-						 'GithubPluginUpdater']
+				 'SeriesPlugin',
+				 'InfoBarTunerState',
+				 'EnhancedMovieCenter',
+				 'GithubPluginUpdater']
 
 filenames = [ '/usr/lib/enigma2/python/Plugins/Extensions/serienrecorder/SerienRecorderHelpers.py',
-						'/usr/lib/enigma2/python/Plugins/Extensions/SeriesPlugin/plugin.py',
-						'/usr/lib/enigma2/python/Plugins/Extensions/InfoBarTunerState/plugin.py',
-						'/usr/lib/enigma2/python/Plugins/Extensions/EnhancedMovieCenter/EnhancedMovieCenter.py',
-						'/usr/lib/enigma2/python/Plugins/Extensions/GithubPluginUpdater/plugin.py']
+			'/usr/lib/enigma2/python/Plugins/Extensions/SeriesPlugin/plugin.py',
+			'/usr/lib/enigma2/python/Plugins/Extensions/InfoBarTunerState/plugin.py',
+			'/usr/lib/enigma2/python/Plugins/Extensions/EnhancedMovieCenter/EnhancedMovieCenter.py',
+			'/usr/lib/enigma2/python/Plugins/Extensions/GithubPluginUpdater/plugin.py']
 
 githuburls = [ 'https://raw.githubusercontent.com/einfall/serienrecorder/master/src/SerienRecorderHelpers.py',
-						 'https://raw.githubusercontent.com/betonme/e2openplugin-SeriesPlugin/master/src/plugin.py',
-						 'https://raw.githubusercontent.com/betonme/e2openplugin-InfoBarTunerState/master/src/plugin.py',
-						 'https://raw.githubusercontent.com/betonme/e2openplugin-EnhancedMovieCenter/master/src/EnhancedMovieCenter.py',
-						 'https://raw.githubusercontent.com/svenh0/GithubPluginUpdater/master/src/plugin.py']
+			 'https://raw.githubusercontent.com/betonme/e2openplugin-SeriesPlugin/master/src/plugin.py',
+			 'https://raw.githubusercontent.com/betonme/e2openplugin-InfoBarTunerState/master/src/plugin.py',
+			 'https://raw.githubusercontent.com/betonme/e2openplugin-EnhancedMovieCenter/master/src/EnhancedMovieCenter.py',
+			 'https://raw.githubusercontent.com/svenh0/GithubPluginUpdater/master/src/plugin.py']
 
 githubcommiturls = [ 'https://github.com/einfall/serienrecorder',
-						 'https://github.com/betonme/e2openplugin-SeriesPlugin',
-						 'https://github.com/betonme/e2openplugin-InfoBarTunerState',
-						 'https://github.com/betonme/e2openplugin-EnhancedMovieCenter',
-						 'https://github.com/svenh0/GithubPluginUpdater']
+					 'https://github.com/betonme/e2openplugin-SeriesPlugin',
+					 'https://github.com/betonme/e2openplugin-InfoBarTunerState',
+					 'https://github.com/betonme/e2openplugin-EnhancedMovieCenter',
+					 'https://github.com/svenh0/GithubPluginUpdater']
 
 githubcommitlisturls = [ 'einfall/serienrecorder',
 						 'betonme/e2openplugin-SeriesPlugin',
@@ -96,27 +102,35 @@ githubcommitlisturls = [ 'einfall/serienrecorder',
 						 'svenh0/GithubPluginUpdater']
 
 gitzipurls = [ 'https://github.com/einfall/serienrecorder/archive/master.zip',
-						 'https://github.com/betonme/e2openplugin-SeriesPlugin/archive/master.zip',
-						 'https://github.com/betonme/e2openplugin-InfoBarTunerState/archive/master.zip',
-						 'https://github.com/betonme/e2openplugin-EnhancedMovieCenter/archive/master.zip',
-						 'https://github.com/svenh0/GithubPluginUpdater/archive/master.zip']
+			 'https://github.com/betonme/e2openplugin-SeriesPlugin/archive/master.zip',
+			 'https://github.com/betonme/e2openplugin-InfoBarTunerState/archive/master.zip',
+			 'https://github.com/betonme/e2openplugin-EnhancedMovieCenter/archive/master.zip',
+			 'https://github.com/svenh0/GithubPluginUpdater/archive/master.zip']
 
 gitzip_folder = [ 'serienrecorder-master',
-						'e2openplugin-SeriesPlugin-master',
-						'e2openplugin-InfoBarTunerState-master',
-						'e2openplugin-EnhancedMovieCenter-master',
-						'GithubPluginUpdater-master']
+				'e2openplugin-SeriesPlugin-master',
+				'e2openplugin-InfoBarTunerState-master',
+				'e2openplugin-EnhancedMovieCenter-master',
+				'GithubPluginUpdater-master']
 
 search_strings = [ 'SRVERSION = ',
-						 'VERSION = ',
-						 'VERSION = ',
-						 'EMCVersion = ',
-						 'VERSION = ']
+				 'VERSION = ',
+				 'VERSION = ',
+				 'EMCVersion = ',
+				 'VERSION = ']
 
 color_strings = [ 'red',
-						 'green',
-						 'yellow',
-						 'blue']
+				 'green',
+				 'yellow',
+				 'blue']
+
+if not isDreamOS:
+	#set EMC-Path to py2-branch
+	githuburls[3] = 'https://raw.githubusercontent.com/betonme/e2openplugin-EnhancedMovieCenter/py2/src/EnhancedMovieCenter.py'
+	githubcommitlisturls[3] = 'betonme/e2openplugin-EnhancedMovieCenter'
+	gitzip_folder[3] = 'e2openplugin-EnhancedMovieCenter-py2'
+	gitzipurls[3] = 'https://github.com/betonme/e2openplugin-EnhancedMovieCenter/archive/py2.zip'
+
 
 sz_w = getDesktop(0).size().width()
 
@@ -224,6 +238,7 @@ class UpdateScreen(Screen, HelpableScreen):
 			global PluginVersion
 			from plugin import VERSION
 			PluginVersion = VERSION
+			self['version'] = Label(VERSION)
 			self.skinName = "GithubPluginUpdater_v2"
 			
 			global pluginnames, filenames, color_strings
@@ -400,7 +415,7 @@ class UpdateScreen(Screen, HelpableScreen):
 				if gpu_version_split == local_version_split and config.plugins.githubpluginupdater.lastcommit[pluginnames[4]].value < last_commit[4]:
 					config.plugins.githubpluginupdater.lastcommit[pluginnames[4]].value = last_commit[4]
 					config.plugins.githubpluginupdater.lastcommit[pluginnames[4]].save()
-					print "[GithubPluginUpdater] fix LastCommit for GithubPluginUpdater"
+					#print "[GithubPluginUpdater] fix LastCommit for GithubPluginUpdater"
 					#print "=== lastcommitconf, lastcommit", gpu_version_split, local_version_split, config.plugins.githubpluginupdater.lastcommit[pluginnames[4]].value, last_commit[4]
 			else:
 				message_txt += "\ngithub Version: " + self.gpu_git_version + " (" + last_commit[4] + ")\n"
@@ -414,7 +429,7 @@ class UpdateScreen(Screen, HelpableScreen):
 					self.msg = None
 
 	def getGPUVersionErrorHandler(self, result):
-			
+			print "=== [GithubPluginUpdater] error", result
 			if self.showUpdateMsgBox == False:
 				self.session.open(MessageBox, _("\nFehler bei der Updateprüfung"), MessageBox.TYPE_INFO)
 			else:
@@ -689,25 +704,25 @@ class UpdateScreen(Screen, HelpableScreen):
 			#2. load last commit-date and commit-info-text
 			if int(limit_remaining) >0 and config.plugins.githubpluginupdater.check_type.value.startswith("api"):
 				if config.plugins.githubpluginupdater.checkonly_src.value:
-					url = "https://api.github.com/repos/" + githubcommitlisturls[number-1] + "/commits?callback=commits&path=src&page=1&per_page=1"
+					url = "https://api.github.com/repos/" + githubcommitlisturls[number-1] + "/commits?callback=commits&tree=%s&path=src&page=1&per_page=1" % getBranch(number)
 				else:
-					url = "https://api.github.com/repos/" + githubcommitlisturls[number-1] + "/commits?callback=commits&page=1&per_page=1"
+					url = "https://api.github.com/repos/" + githubcommitlisturls[number-1] + "/commits?callback=commits&tree=%s&page=1&per_page=1" % getBranch(number)
 				self.checkType = "api"
 			
 			elif (int(limit_remaining) == 0 and config.plugins.githubpluginupdater.check_type.value == "api-normal") or config.plugins.githubpluginupdater.check_type.value == "normal":
 				url = githubcommiturls[number-1]
 				if config.plugins.githubpluginupdater.checkonly_src.value:
-					url += "/tree/master/src" # check only src-folder
+					url += "/tree/%s/src" % getBranch(number)# check only src-folder
 				self.checkType = "normal"
 			
 			elif config.plugins.githubpluginupdater.check_type.value in ("commits","api-commits"):
-				url = githubcommiturls[number-1] + "/commits/master"
+				url = githubcommiturls[number-1] + "/commits/%s" % getBranch(number)
 				if config.plugins.githubpluginupdater.checkonly_src.value:
 					url += "/src" # check only src-folder
 				self.checkType = "commits"
 
 			#print "=====[GithubPluginUpdater]", limit_remaining, url
-			headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36',}
+			headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36', 'Accept': 'application/vnd.github.v3.full+json'}
 			self.deferred = getPage(url, timeout=10, headers=headers)
 			self.deferred.addCallback(self.getLastCommit, number)
 			self.deferred.addErrback(self.errorHandler, number)
@@ -771,9 +786,9 @@ class UpdateScreen(Screen, HelpableScreen):
 					contents = jsonp[ jsonp.index("(") + 1 : jsonp.rindex(")") ]
 					commits = json.loads(contents)
 					#print "=== contents: ", commits['meta']
-					limit_remaining = commits['meta']['X-RateLimit-Remaining']
-					limit_resetTime = commits['meta']['X-RateLimit-Reset']
-					limit = commits['meta']['X-RateLimit-Limit']
+					#limit_remaining = commits['meta']['X-RateLimit-Remaining']
+					#limit_resetTime = commits['meta']['X-RateLimit-Reset']
+					#limit = commits['meta']['X-RateLimit-Limit']
 					
 					#print "=====[GithubPluginUpdater] limit_remaining ==", limit_remaining
 					if limit_remaining != "0":
@@ -999,11 +1014,9 @@ class UpdateScreen(Screen, HelpableScreen):
 				config.plugins.githubpluginupdater.save()
 				self.keyOK()
 			elif ret == "install_curl":
-				cmd = "opkg install curl"
-				self.session.open(Console,_("GithubPluginUpdater") + " (" + PluginVersion + ")",[cmd])
+				self.session.openWithCallback(boundFunction(self.curlMenuCallback,ret), MessageBox, _('Soll das curl-Paket installiert werden?'),MessageBox.TYPE_YESNO)
 			elif ret == "remove_curl":
-				cmd = "opkg remove curl"
-				self.session.open(Console,_("GithubPluginUpdater") + " (" + PluginVersion + ")",[cmd])
+				self.session.openWithCallback(boundFunction(self.curlMenuCallback,ret), MessageBox, _('Soll das curl-Paket deinstalliert werden?'),MessageBox.TYPE_YESNO)
 			elif ret == 'restore_backup':
 				list = []
 				list.append((_('Backup für GithubPluginUpdater wiederherstellen'), 'restore_backup_4'))
@@ -1016,6 +1029,14 @@ class UpdateScreen(Screen, HelpableScreen):
 				else:
 					self.session.open(MessageBox, 'keines der möglichen Plugins ist auf der Box installiert.\nEine Backup-Wiederherstellung ist dadurch nicht möglich.', MessageBox.TYPE_INFO)
 
+	def curlMenuCallback(self, cmd, ret):
+		if ret and cmd == "install_curl":
+			cmd = "opkg install curl"
+			self.session.open(Console,_("GithubPluginUpdater") + " (" + PluginVersion + ")",[cmd])
+		elif ret and cmd == "remove_curl":
+			cmd = "opkg remove curl"
+			self.session.open(Console,_("GithubPluginUpdater") + " (" + PluginVersion + ")",[cmd])
+	
 	def backupmenuCallback(self, ret):
 		ret = ret and ret[1]
 		#print "=====[GithubPluginUpdater] ret backupmenu ===", ret
@@ -1273,12 +1294,25 @@ class showUpdateInfo(Screen):
 		global githubcommitlisturls
 		
 		if config.plugins.githubpluginupdater.checkonly_src.value:
-			url = "https://api.github.com/repos/" + githubcommitlisturls[self.number-1] + "/commits?callback=commits&path=src&page=1&per_page=10"
+			url = "https://api.github.com/repos/" + githubcommitlisturls[self.number-1] + "/commits?callback=commits&tree=%s&path=src&page=1&per_page=10" % getBranch(self.number)
 		else:
-			url = "https://api.github.com/repos/" + githubcommitlisturls[self.number-1] + "/commits?callback=commits&page=1&per_page=10"
+			url = "https://api.github.com/repos/" + githubcommitlisturls[self.number-1] + "/commits?callback=commits&tree=%s&page=1&per_page=10" % getBranch(self.number)
 		self.deferred = getPage(url, timeout=5, method="GET", headers={'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3',})
 		self.deferred.addCallback(self.getCommitsContent)
 		self.deferred.addErrback(self.errorHandler)
+		
+		# from twisted.internet import reactor
+		# from twisted.web.client import Agent
+		# from twisted.web.http_headers import Headers
+		# from twisted.internet.ssl import ClientContextFactory
+		# class WebClientContextFactory(ClientContextFactory):
+			# def getContext(self, hostname, port):
+				# print( "getting context for {}:{}".format( hostname, port ) )
+				# # FIXME: no attempt to verify certificates!
+				# return ClientContextFactory.getContext(self)
+		# agent = Agent( reactor, WebClientContextFactory() )
+		# self.deferred = agent.request(b'GET', url, Headers({'User-Agent': ['Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3']}),None)
+		# self.deferred.addCallbacks(self.getCommitsResponse,self.errorHandler)
 
 	def errorHandler(self, result):
 			print "[GithubPluginUpdater] getContentError: ", result
@@ -1289,9 +1323,9 @@ class showUpdateInfo(Screen):
 		from twisted.web.client import readBody
 
 		#print 'contents:', contents
-		print 'Response version:', contents.version
-		print 'Response code:', contents.code
-		print 'Response phrase:', contents.phrase
+		#print 'Response version:', contents.version
+		#print 'Response code:', contents.code
+		#print 'Response phrase:', contents.phrase
 		
 		#print 'Response headers:'
 		#print "== heraders1: \n", list(contents.headers.getAllRawHeaders())
@@ -1334,10 +1368,10 @@ class showUpdateInfo(Screen):
 
 			commits = json.loads(contents)
 
-			global limit_remaining, limit_resetTime
-			limit_remaining = commits['meta']['X-RateLimit-Remaining']
-			limit_resetTime = commits['meta']['X-RateLimit-Reset']
-			limit						= commits['meta']['X-RateLimit-Limit']
+			#global limit_remaining, limit_resetTime
+			#limit_remaining = commits['meta']['X-RateLimit-Remaining']
+			#limit_resetTime = commits['meta']['X-RateLimit-Reset']
+			#limit						= commits['meta']['X-RateLimit-Limit']
 			
 			if limit_remaining == "0":
 				text =  self.firstLineText + _("\nDie erweiterte Update-Info konnte nicht geladen werden.\nDas stündliche Limit für github-Abfragen wurde erreicht!!\n")
@@ -1391,3 +1425,11 @@ class showUpdateInfo(Screen):
 		
 		self.loadcommits()
 
+
+#global function ================
+def getBranch(number):
+	if not isDreamOS and number == 4:
+		print "[GithubPluginUpdater] use Branch for '%s': py2" % pluginnames[number-1]
+		return "py2"
+	print "[GithubPluginUpdater] use Branch for '%s': master" % pluginnames[number-1]
+	return "master"

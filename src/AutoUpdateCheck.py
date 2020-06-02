@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 
 from Components.config import config
-from Tools.Notifications import AddPopup
-from Screens.MessageBox import MessageBox
+#from Tools.Notifications import AddPopup
+#from Screens.MessageBox import MessageBox
+from GithubPluginUpdaterMessage import MessageBoxGPU as MessageBox
+from GithubPluginUpdaterMessage import AddPopupGPU as AddPopup
 from Screens.Screen import Screen
 
 from socket import timeout
 from twisted.web.client import getPage
 from Tools.BoundFunction import boundFunction
 
-from GithubPluginUpdater import reload_value, githuburls, pluginnames, lastgithubcommits, githubcommiturls, githubcommitlisturls,search_strings, filenames
+from GithubPluginUpdater import reload_value, githuburls, pluginnames, lastgithubcommits, githubcommiturls, githubcommitlisturls,search_strings, filenames, getBranch
 
 import GithubPluginUpdater
 import os
@@ -88,19 +90,19 @@ def loadPages():
 					#set url to get lastcommit-Date
 					if int(limit_remaining) > 0 and config.plugins.githubpluginupdater.check_type.value.startswith("api"):
 						if config.plugins.githubpluginupdater.checkonly_src.value:
-							url = "https://api.github.com/repos/" + githubcommitlisturls[i] + "/commits?callback=commits&path=src&page=1&per_page=1"
+							url = "https://api.github.com/repos/" + githubcommitlisturls[i] + "/commits?callback=commits&tree=%s&path=src&page=1&per_page=1" % getBranch(i+1)
 						else:
-							url = "https://api.github.com/repos/" + githubcommitlisturls[i] + "/commits?callback=commits&page=1&per_page=1"
+							url = "https://api.github.com/repos/" + githubcommitlisturls[i] + "/commits?callback=commits&tree=%s&page=1&per_page=1" % getBranch(i+1)
 						checkType = "api"
 					
 					elif (int(limit_remaining) == 0 and config.plugins.githubpluginupdater.check_type.value == "api-normal") or config.plugins.githubpluginupdater.check_type.value == "normal":
 						url = githubcommiturls[i]
 						if config.plugins.githubpluginupdater.checkonly_src.value:
-							url += "/tree/master/src" # check only src-folder
+							url += "/tree/%s/src" % getBranch(i+1) # check only src-folder
 						checkType = "normal"
 					
 					elif config.plugins.githubpluginupdater.check_type.value in ("commits","api-commits"):
-						url = githubcommiturls[i] + "/commits/master"
+						url = githubcommiturls[i] + "/commits/%s" % getBranch(i+1)
 						if config.plugins.githubpluginupdater.checkonly_src.value:
 							url += "/src" # check only src-folder
 						checkType = "commits"
@@ -149,9 +151,9 @@ def getLastCommit(contents, number):
 						contents = jsonp[ jsonp.index("(") + 1 : jsonp.rindex(")") ]
 						commits = json.loads(contents)
 						#print "=== contents: ", commits['meta']
-						limit_remaining = commits['meta']['X-RateLimit-Remaining']
-						limit_resetTime = commits['meta']['X-RateLimit-Reset']
-						limit = commits['meta']['X-RateLimit-Limit']
+						#limit_remaining = commits['meta']['X-RateLimit-Remaining']
+						#limit_resetTime = commits['meta']['X-RateLimit-Reset']
+						#limit = commits['meta']['X-RateLimit-Limit']
 						
 						if limit_remaining != "0":
 							commits = commits['data']

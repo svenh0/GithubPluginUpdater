@@ -7,7 +7,8 @@ from enigma import getDesktop
 # GUI (Screens)
 from Screens.Screen import Screen
 from Components.ConfigList import ConfigListScreen
-from Screens.MessageBox import MessageBox
+#from Screens.MessageBox import MessageBox
+from GithubPluginUpdaterMessage import MessageBoxGPU as MessageBox
 
 # GUI (Summary)
 from Screens.Setup import SetupSummary
@@ -76,7 +77,7 @@ class GithubPluginUpdaterSetup(Screen, ConfigListScreen):
 		self.list = []
 		self.buildConfig()
 		ConfigListScreen.__init__(self, self.list, session = session, on_change = self.changed)
-		
+
 		def selectionChanged():
 			if self["config"].current:
 				self["config"].current[1].onDeselect(self.session)

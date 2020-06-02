@@ -1,7 +1,5 @@
 from Plugins.Plugin import PluginDescriptor
 from Components.config import config, ConfigText, ConfigSubDict, ConfigYesNo
-from Tools.Notifications import AddPopup
-from Screens.MessageBox import MessageBox
 from enigma import eTimer
 from datetime import datetime, timedelta
 import Screens.Standby
@@ -14,7 +12,7 @@ from GithubPluginUpdater import reload_value, githuburls, search_strings, filena
 import GithubPluginUpdater
 import AutoUpdateCheck
 
-VERSION = "1.6.3"
+VERSION = "1.6.4"
 
 session = None
 updateTimer = None
