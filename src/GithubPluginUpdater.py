@@ -407,8 +407,8 @@ class UpdateScreen(Screen, HelpableScreen):
 				if self.gpu_force_install == False:
 					message_txt += "\nEs existiert eine neuere Version!\n" 
 				message_txt += "\n" + last_commit_info_txt + "\n\nSoll das Update jetzt gestartet werden?\n"
-				self.UpdateNumber = 5 
-				self.session.openWithCallback(self.runUpdateScriptCallback, MessageBox, message_txt, MessageBox.TYPE_YESNO, default = True)
+				self.UpdateNumber = 5
+				self.session.openWithCallback(self.runUpdateScriptCallback, MessageBox, str(message_txt), MessageBox.TYPE_YESNO, default = True)
 
 			elif autocheck == True: #fix wrong updateinfo if is use the current version (on open plugin)
 				#print "=== git, local, lastcommitconf, lastcommit", gpu_version_split, local_version_split, config.plugins.githubpluginupdater.lastcommit[pluginnames[4]].value, last_commit[4]

@@ -12,7 +12,7 @@ from GithubPluginUpdater import reload_value, githuburls, search_strings, filena
 import GithubPluginUpdater
 import AutoUpdateCheck
 
-VERSION = "1.6.4"
+VERSION = "1.6.5"
 
 session = None
 updateTimer = None
