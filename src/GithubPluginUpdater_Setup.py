@@ -24,6 +24,7 @@ from Components.config import *
 
 import os
 from datetime import datetime, timedelta
+from . import _
 
 PluginVersion = ""
 
@@ -92,7 +93,7 @@ class GithubPluginUpdaterSetup(Screen, ConfigListScreen):
 		# Initialize widgets
 		self["key_green"] = StaticText(_("OK"))
 		self["key_red"] = StaticText(_("Cancel"))
-		self["key_yellow"] = StaticText("Update-Info")
+		self["key_yellow"] = StaticText(_("Update-Info"))
 		self["key_blue"] = StaticText("")
 		self["help"] = Label("")
 		
@@ -112,30 +113,30 @@ class GithubPluginUpdaterSetup(Screen, ConfigListScreen):
 
 	def buildConfig(self):
 		
-		self.list.append( getConfigListEntry(_("Updatecheck und Info beim Start der Box"), config.plugins.githubpluginupdater.enable_autocheck, _("Prüft beim Box-Start (auch GUI-Neustart und Start aus dem Idle) auf Updates und gibt eine Meldung aus (nein/nur bei Updates/immer). Bei 'immer' kommt auch eine Info-Meldung, dass kein Update verfügbar ist.")) )
+		self.list.append( getConfigListEntry(_("Updatecheck and Info on starting the box"), config.plugins.githubpluginupdater.enable_autocheck, _("check on boxstart (also on GUI-Restart and start from Idle) for updates and show a message (none/only on updates/always). On 'always' show a message also if is not updates avaible.")) )
 		
 		if config.plugins.githubpluginupdater.enable_autocheck.value != "False":
-			self.list.append( getConfigListEntry(_("   Intervall für AutoUpdateCheck beim Start der Box"), config.plugins.githubpluginupdater.autoCheck_interval, _("Legt den Prüf-Intervall für den AutoUpdateCheck beim Start der Box fest. Innerhalb des Intervalls erfolgt kein erneuter Update-Check beim Start der Box.")) )
+			self.list.append( getConfigListEntry(_("   interval of AutoUpdateCheck on boxstart"), config.plugins.githubpluginupdater.autoCheck_interval, _("set the check-interval of AutoUpdateCheck on boxstart. Within the interval there is no renewed update check when the box is started.")) )
 			
-			self.list.append( getConfigListEntry(_("   Anzeigedauer für Update-Info-Fenster (in Sek)"), config.plugins.githubpluginupdater.popups_timeout, _("Legt fest, nach wieviel Sekunden das Update-Info-Fenster automatisch geschlossen wird (1-20 Sek., 0 = wartet auf Tastendruck)")) )
+			self.list.append( getConfigListEntry(_("   duration of update-info-window (in seconds)"), config.plugins.githubpluginupdater.popups_timeout, _("set after how many seconds the update-info-window is closed (1-20 seconds, 0 = wait for key-press)")) )
 			
-			self.list.append( getConfigListEntry(_("   erweiterte Update-Info mit Frage zum Öffnen des Plugins"), config.plugins.githubpluginupdater.show_updatequestion, _("Zeigt beim Update-Hinweis zusätzlich eine Frage, ob man den GithubPluginUpdater direkt direkt öffnen möchte.")) )
+			self.list.append( getConfigListEntry(_("   advanced update-info with question to open the plugin"), config.plugins.githubpluginupdater.show_updatequestion, _("show on update-info an additioal question, if you want to open directly the GithubPluginUpdater.")) )
 			
 			if config.plugins.githubpluginupdater.show_updatequestion.value == "True":
-				self.list.append( getConfigListEntry(_("       Antwort für Frage steht standardmäßig auf:"), config.plugins.githubpluginupdater.updatequestion_defaultanswer, _("Legt fest, welche Antwort für die Frage zum Öffnen des GithubPluginUpdaters standardmäßig vorausgewählt sein soll. Bei 'nein' öffnet sich das Plugin bei Zeitablauf der Frage nicht automatisch.")) )
+				self.list.append( getConfigListEntry(_("       answer for question is default set to:"), config.plugins.githubpluginupdater.updatequestion_defaultanswer, _("set the default answer to the question to open the GithubPluginUpdaters. on 'no' the plugin is not open automaically on timeout of the question.")) )
 			
 			from GithubPluginUpdater import pluginnames, filenames
-			self.list.append( getConfigListEntry(_("   Update-Check für %s bei Box-Start") % pluginnames[4], config.plugins.githubpluginupdater.update_check[pluginnames[4]], _("Legt fest, ob für das Plugin beim Box-Start eine Update-Prüfung durchgeführt werden soll.")) )
+			self.list.append( getConfigListEntry(_("   update-check for %s on boxstart") % pluginnames[4], config.plugins.githubpluginupdater.update_check[pluginnames[4]], _("set if you want to check for updates for this plugin on box-start.")) )
 			for counter in range(len(pluginnames)-1):
 				if os.path.isfile(filenames[counter]):
-					self.list.append( getConfigListEntry(_("   Update-Check für %s bei Box-Start") % pluginnames[counter], config.plugins.githubpluginupdater.update_check[pluginnames[counter]], _("Legt fest, ob für das Plugin beim Box-Start eine Update-Prüfung durchgeführt werden soll.")) )
+					self.list.append( getConfigListEntry(_("   update-check for %s on boxstart") % pluginnames[counter], config.plugins.githubpluginupdater.update_check[pluginnames[counter]], _("set if you want to check for updates for this plugin on box-start.")) )
 		
-		self.list.append( getConfigListEntry(_("Variante zum Prüfen auf github-Updates / Alternative"), config.plugins.githubpluginupdater.check_type, _("Es gibt 3 Varianten zur Update-Prüfung. Am zuverlässigstens ist die Variante 'api-Abruf', welche eine Zugriffsbeschränkung von 60 Abrufen pro Stunde hat. Bei api kann eine Rückfall-Alternative gewählt werden.")) )
-		self.list.append( getConfigListEntry(_("Prüfe nur den src-Ordner"), config.plugins.githubpluginupdater.checkonly_src, _("Prüft nur den src-Ordner auf ein Update. Dabei werden unrelevante Updates außerhalb dieses Ordners ignoriert, da eh nur der src-Ordner geupdatet wird.")) )
-		self.list.append( getConfigListEntry(_("Warnhinweis vor einem github-Update anzeigen"), config.plugins.githubpluginupdater.show_warninginfo, _("Der Warnhinweis vor einem github-Update zu den möglichen Folgen eines solchen Updates kann hier aktiviert bzw. deaktiviert werden.")) )
-		self.list.append( getConfigListEntry(_("erzeuge ein Backup des Plugins vor dem Update"), config.plugins.githubpluginupdater.backup, _("Legt vor dem Update der Github-Version ein Backup des lokalen Plugins an.")) )
+		self.list.append( getConfigListEntry(_("option to check for github-updates / alternative"), config.plugins.githubpluginupdater.check_type, _("There are 3 options for the update check. The most reliable option is the 'api call', which has an access restriction of 60 calls per hour. A relapse alternative can be chosen at api.")) )
+		self.list.append( getConfigListEntry(_("check only the src-folder"), config.plugins.githubpluginupdater.checkonly_src, _("Checks only the src folder for an update. Irrelevant updates outside of this folder are ignored, since only the src folder is updated anyway.")) )
+		self.list.append( getConfigListEntry(_("show warning before a github update"), config.plugins.githubpluginupdater.show_warninginfo, _("The warning before a github update on the possible consequences of such an update can be activated or deactivated here.")) )
+		self.list.append( getConfigListEntry(_("create a backup of the plugin before update"), config.plugins.githubpluginupdater.backup, _("create a backup from the local plugin before update the guthub-version.")) )
 		if config.plugins.githubpluginupdater.backup.value:
-			self.list.append( getConfigListEntry(_("   Speicherort für das Plugin-Backup"), config.plugins.githubpluginupdater.backup_path, _("Legt den Ort für das Plugin-Backup fest (Auswahl mit OK). Der Pfad wird noch durch die lokale Plugin-Versionsnummer und Datum/Zeit ergänzt.")) )
+			self.list.append( getConfigListEntry(_("   storage location for the plugin backup"), config.plugins.githubpluginupdater.backup_path, _("Defines the location for the plugin backup (selection with OK). The path is supplemented by the local plugin version number and date/time.")) )
 
 	def layoutFinished(self):
 		self.setTitle(self.setup_title)

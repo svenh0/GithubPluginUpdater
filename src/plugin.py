@@ -3,6 +3,7 @@ from Components.config import config, ConfigText, ConfigSubDict, ConfigYesNo
 from enigma import eTimer
 from datetime import datetime, timedelta
 import Screens.Standby
+from . import _
 
 from socket import timeout
 from twisted.web.client import getPage
@@ -12,7 +13,7 @@ from GithubPluginUpdater import reload_value, githuburls, search_strings, filena
 import GithubPluginUpdater
 import AutoUpdateCheck
 
-VERSION = "1.6.5"
+VERSION = "1.7.0"
 
 session = None
 updateTimer = None
@@ -38,10 +39,10 @@ def leaveStandby():
 	global session
 	try:
 		if config.plugins.githubpluginupdater.enable_autocheck.value != "False":
-			print "[GithubPluginUpdater] aus standby aufgewacht - runUpdateCheck"
+			print "[GithubPluginUpdater] wakeup from standby - runUpdateCheck"
 			startUpdateCheck()
 		else:
-			print "[GithubPluginUpdater] aus standby aufgewacht - AutoUpdateCheck nicht aktiviert"
+			print "[GithubPluginUpdater] wakeup from standby - AutoUpdateCheck not activated"
 		
 	except:
 		import traceback
@@ -50,7 +51,7 @@ def leaveStandby():
 
 def standbyCounterChanged(configElement):
 	
-	print "[GithubPluginUpdater] gehe in standby..."
+	print "[GithubPluginUpdater] go to standby..."
 	from Screens.Standby import inStandby
 	inStandby.onClose.append(leaveStandby)
 
@@ -144,8 +145,8 @@ def main(session, **kwargs):
 def Plugins(**kwargs):
 
 	descriptors = []
-	descriptors.append( PluginDescriptor(name =_("GithubPluginUpdater"), description=_("github-Versionen updaten")+ " (" + VERSION + ")", where = PluginDescriptor.WHERE_SESSIONSTART, fnc=sessionstart) )
-	descriptors.append( PluginDescriptor(name =_("GithubPluginUpdater"), description=_("github-Versionen updaten")+ " (" + VERSION + ")", where=[ PluginDescriptor.WHERE_EXTENSIONSMENU, PluginDescriptor.WHERE_PLUGINMENU ], fnc = main, needsRestart = False, icon = "GithubPluginUpdater.png") )
+	descriptors.append( PluginDescriptor(name =_("GithubPluginUpdater"), description=_("update github-versions")+ " (" + VERSION + ")", where = PluginDescriptor.WHERE_SESSIONSTART, fnc=sessionstart) )
+	descriptors.append( PluginDescriptor(name =_("GithubPluginUpdater"), description=_("update github-versions")+ " (" + VERSION + ")", where=[ PluginDescriptor.WHERE_EXTENSIONSMENU, PluginDescriptor.WHERE_PLUGINMENU ], fnc = main, needsRestart = False, icon = "GithubPluginUpdater.png") )
 
 	return descriptors
 

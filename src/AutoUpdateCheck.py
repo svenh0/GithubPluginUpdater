@@ -16,6 +16,7 @@ from GithubPluginUpdater import reload_value, githuburls, pluginnames, lastgithu
 import GithubPluginUpdater
 import os
 import time
+from . import _
 
 try:
 	import simplejson as json
@@ -215,7 +216,7 @@ def getUpdateInfoMessage(MessageBoxType = MessageBox.TYPE_INFO):
 			if UpdateExist:
 				if config.plugins.githubpluginupdater.enable_autocheck.value != "False":
 					if config.plugins.githubpluginupdater.show_updatequestion.value == "False":
-						AddPopup("\n = GithubPluginUpdater = \n\n  >>> es liegen für folgende Plugins Updates vor !!! <<<\n  " + UpdatePluginnames + "\n\n\n  zum Update den GithubPluginUpdater öffnen",MessageBoxType , int(config.plugins.githubpluginupdater.popups_timeout.value),'GPU_PopUp_Update')
+						AddPopup(_("\n = GithubPluginUpdater = \n\n  >>> there are updates for the following plugins !!! <<<\n  %s\n\n\n  open the GithubPluginUpdater for the update") % UpdatePluginnames,MessageBoxType , int(config.plugins.githubpluginupdater.popups_timeout.value),'GPU_PopUp_Update')
 					else:
 						if reload_value:
 							reload(GithubPluginUpdater)
@@ -223,7 +224,7 @@ def getUpdateInfoMessage(MessageBoxType = MessageBox.TYPE_INFO):
 						session.open(UpdateInfo, UpdatePluginnames)
 			else:
 				if config.plugins.githubpluginupdater.enable_autocheck.value == "True":
-					AddPopup("\n = GithubPluginUpdater = \n\n  keine Plugin-Updates gefunden",MessageBoxType, int(config.plugins.githubpluginupdater.popups_timeout.value),'GPU_PopUp_Update')
+					AddPopup(_("\n = GithubPluginUpdater = \n\n  no plugin updates found"),MessageBoxType, int(config.plugins.githubpluginupdater.popups_timeout.value),'GPU_PopUp_Update')
 			
 			#set lastAutoCheckTime
 			config.plugins.githubpluginupdater.lastAutoCheck.value = int(time.time())
