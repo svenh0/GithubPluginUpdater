@@ -887,7 +887,7 @@ class UpdateScreen(Screen, HelpableScreen):
 				
 				for i in range(4):
 					if self["myplugin" + str(i+1) + "_lokal_version"].getText() and not config.plugins.githubpluginupdater.lastcommit[pluginnames[i]].value:
-						self.session.open(MessageBox, _('There are not local github date values ​​for all plugins that are used for version comparison.\nTherefore, these plugins are automatically offered as an update. There are the following options for the first time to save a local github date:\n\n1. if all plugins on the box are actually up to date, then the menu button can be used to select the option "set the current github date for all plugins"\n\nor\n\n2. the respective plugins can be updated using the color button.\n\nAfterwards all plugins should be displayed as current.'), MessageBox.TYPE_INFO)
+						self.session.open(MessageBox, _("There are not local github date values for all plugins that are used for version comparison.\nTherefore, these plugins are automatically offered as an update. There are the following options for the first time to save a local github date:\n\n1. if all plugins on the box are actually up to date, then the menu button can be used to select the option 'set the current github date for all plugins'\n\nor\n\n2. the respective plugins can be updated using the color button.\n\nAfterwards all plugins should be displayed as current."), MessageBox.TYPE_INFO)
 						break
 				
 				#reload Limit_Remaining to show in the status-text in the screen
@@ -1027,7 +1027,7 @@ class UpdateScreen(Screen, HelpableScreen):
 				list.append((_("restore backup for GithubPluginUpdater"), 'restore_backup_4'))
 				for i in range(len(pluginnames)-1):
 					if os.path.isfile(filenames[i]):
-						list.append((_("restor backup for %s") % pluginnames[i], 'restore_backup_' + str(i)))
+						list.append((_("restore backup for %s") % pluginnames[i], 'restore_backup_' + str(i)))
 
 				if len(list):
 					self.session.openWithCallback(self.backupmenuCallback, ChoiceBox, title=_("menu restore plugin backup"), list=list)

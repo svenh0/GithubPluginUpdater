@@ -13,7 +13,7 @@ from GithubPluginUpdater import reload_value, githuburls, search_strings, filena
 import GithubPluginUpdater
 import AutoUpdateCheck
 
-VERSION = "1.7.0"
+VERSION = "1.7.1"
 
 session = None
 updateTimer = None
@@ -38,6 +38,10 @@ except:
 def leaveStandby():
 	global session
 	try:
+		if isDreamOS and session and session.shutdown:
+			print "[GithubPluginUpdater] wakeup from standby - shutdown"
+			return
+		
 		if config.plugins.githubpluginupdater.enable_autocheck.value != "False":
 			print "[GithubPluginUpdater] wakeup from standby - runUpdateCheck"
 			startUpdateCheck()

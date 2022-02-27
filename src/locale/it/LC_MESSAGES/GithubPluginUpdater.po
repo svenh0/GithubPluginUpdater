@@ -1,18 +1,19 @@
+# Signed-off-by: Dario Croci <spaeleus@croci.org>
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Enigma2 GithubPluginUpdater\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-26 19:46+0100\n"
-"PO-Revision-Date: 2022-02-26 19:47+0100\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: de_DE\n"
+"Project-Id-Version: GithubPluginUpdater v1.7.1\n"
+"POT-Creation-Date: 2022-02-26 23:12+0100\n"
+"PO-Revision-Date: 2022-02-26 23:16+0100\n"
+"Last-Translator: Dario Croci <spaeleus@croci.org>\n"
+"Language-Team: DREAM-ELITE <https://www.dream-elite.net>\n"
+"Language: it_IT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.0.1\n"
 "X-Poedit-Basepath: ../../..\n"
-"X-Poedit-SourceCharset: UTF-8\n"
-"X-Generator: Poedit 2.4.3\n"
 "X-Poedit-SearchPath-0: .\n"
 
 #: AutoUpdateCheck.py:219
@@ -30,11 +31,11 @@ msgstr ""
 "\n"
 " = GithubPluginUpdater = \n"
 "\n"
-"  >>> es liegen für folgende Plugins Updates vor !!! <<<\n"
+"  >>> Sono presenti aggiornamenti per i seguenti plugin <<<\n"
 "  %s\n"
 "\n"
 "\n"
-"  zum Update den GithubPluginUpdater öffnen"
+"  Aprire GithubPluginUpdater per aggiornarli"
 
 #: AutoUpdateCheck.py:227
 msgid ""
@@ -46,79 +47,79 @@ msgstr ""
 "\n"
 " = GithubPluginUpdater = \n"
 "\n"
-"  keine Plugin-Updates gefunden"
+"  Nessun aggiornamento disponibile"
 
 #: GithubPluginUpdater.py:243
 msgid "menu"
-msgstr "Menü"
+msgstr "Menu"
 
 #: GithubPluginUpdater.py:244
 msgid "state:"
-msgstr "Status:"
+msgstr "Stato:"
 
 #: GithubPluginUpdater.py:245
 msgid "(local version)"
-msgstr "(lokale Version)"
+msgstr "(versione locale)"
 
 #: GithubPluginUpdater.py:246
 msgid "(github version)"
-msgstr "(github Version)"
+msgstr "(versione github)"
 
 #: GithubPluginUpdater.py:261
 msgid "local versions was loaded"
-msgstr "lokale Versionen wurden geladen"
+msgstr "È stata caricata la versione locale"
 
 #: GithubPluginUpdater.py:309
 msgid "reload github-data"
-msgstr "Neuladen der github-Daten"
+msgstr "Ricaricare i dati github"
 
 #: GithubPluginUpdater.py:310
 msgid "close plugin"
-msgstr "Plugin beenden"
+msgstr "Chiudere il plugin"
 
 #: GithubPluginUpdater.py:311
 msgid "open the plugin-menu"
-msgstr "Plugin-Menü öffnen"
+msgstr "Aprire il menu del plugin"
 
 #: GithubPluginUpdater.py:312
 msgid "update-check for GithubPluginUpdater"
-msgstr "Updateprüfung für GithubPluginUpdater"
+msgstr "Verificare aggiornamenti per GithubPluginUpdater"
 
 #: GithubPluginUpdater.py:313
 msgid "advanced update-info for GithubPluginUpdater"
-msgstr "erweiterte Update-Info für GithubPluginUpdater"
+msgstr "Informazioni di aggiornamento avanzate per GithubPluginUpdater"
 
 #: GithubPluginUpdater.py:317
 msgid "update for "
-msgstr "Update für "
+msgstr "Aggiornamento per "
 
 #: GithubPluginUpdater.py:321
 msgid "forced update for "
-msgstr "Zwangs-Update für "
+msgstr "Aggiornamento forzato per "
 
 #: GithubPluginUpdater.py:325 GithubPluginUpdater.py:533
 msgid "update-info for "
-msgstr "Update-Info für "
+msgstr "Info aggiornamento per "
 
 #: GithubPluginUpdater.py:329
 msgid "advanced update-info for "
-msgstr "erweiterte Update-Info für "
+msgstr "Info avanzate aggiornamento per "
 
 #: GithubPluginUpdater.py:352
 msgid ""
 "to reload the github-versions press 'OK'\n"
 "Keys 1-4 to show last github-update-info"
 msgstr ""
-"zum Neuladen der github-Versionen 'OK' drücken\n"
-"Tasten 1-4 zur Anzeige der letzten Github-Update-Info"
+"Per ricaricare la versione github premere \"OK\".\n"
+"Utilizzare i tasti 1-4 per mostrare le ultime info github-update"
 
 #: GithubPluginUpdater.py:402
 msgid "update check for GithubPluginUpdater:\n"
-msgstr "Updateprüfung für GithubPluginUpdater:\n"
+msgstr "Verificare aggiornamento per GithubPluginUpdater:\n"
 
 #: GithubPluginUpdater.py:405 GithubPluginUpdater.py:426
 msgid "github version: "
-msgstr "github Version: "
+msgstr "Versione github: "
 
 #: GithubPluginUpdater.py:409
 msgid ""
@@ -126,7 +127,7 @@ msgid ""
 "... more infos in the advanced update-info ..."
 msgstr ""
 "\n"
-"... weitere Infos in der erweiterten Updatinfo ..."
+"...info dettagliate nelle info di aggiornamento avanzate..."
 
 #: GithubPluginUpdater.py:413
 msgid ""
@@ -134,7 +135,7 @@ msgid ""
 "A newer version exists!\n"
 msgstr ""
 "\n"
-"Es existiert eine neuere Version!\n"
+"È presente una nuova versione.\n"
 
 #: GithubPluginUpdater.py:414
 msgid ""
@@ -144,18 +145,18 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Soll das Update jetzt gestartet werden?\n"
+"Avviare l'aggiornamento?\n"
 
 #: GithubPluginUpdater.py:427
 msgid "local version:   "
-msgstr "lokale Version:  "
+msgstr "Versione locale:   "
 
 #: GithubPluginUpdater.py:428
 msgid ""
 "The latest version is already being used!                        \n"
 " "
 msgstr ""
-"Es wird bereits die aktuellste Version genutzt!                        \n"
+"È già in uso l'ultima versione.                        \n"
 " "
 
 #: GithubPluginUpdater.py:439 GithubPluginUpdater.py:441
@@ -164,7 +165,7 @@ msgid ""
 "error on update-check"
 msgstr ""
 "\n"
-"Fehler bei der Updateprüfung"
+"Errore nella verifica degli aggiornamenti"
 
 #: GithubPluginUpdater.py:447
 msgid ""
@@ -173,10 +174,10 @@ msgid ""
 "\n"
 "load data ..."
 msgstr ""
-"Updateprüfung für GithubPluginUpdater\n"
+"Verifica aggiornamenti per GithubPluginUpdater\n"
 "\n"
 "\n"
-"lade Daten ..."
+"Caricamento dati in corso..."
 
 #: GithubPluginUpdater.py:481 GithubPluginUpdater.py:590
 #: GithubPluginUpdater.py:1040 GithubPluginUpdater.py:1043
@@ -186,7 +187,7 @@ msgstr "GithubPluginUpdater"
 
 #: GithubPluginUpdater.py:481
 msgid "advanced github-update-infos for "
-msgstr "erweiterte github-Update-Info für "
+msgstr "Info avanzate aggiornamenti github per "
 
 #: GithubPluginUpdater.py:481
 msgid ""
@@ -194,24 +195,24 @@ msgid ""
 "for more update-infos please visit the github-website.\n"
 msgstr ""
 "\n"
-"für weitere Update-Infos bitte die github-Website besuchen.\n"
+"Per maggiori info sugli aggiornamenti visitare il sito web github.\n"
 
 #: GithubPluginUpdater.py:493
 msgid "github-date: "
-msgstr "github-Datum: "
+msgstr "data github: "
 
 #: GithubPluginUpdater.py:494
 msgid "last update-info for "
-msgstr "letzte Update-Info für "
+msgstr "Ultime info aggiornamenti per "
 
 #: GithubPluginUpdater.py:496
 #, python-format
 msgid "No update info for %s could be found."
-msgstr "Es konnte keine Updateinfo für %s gefunden werden."
+msgstr "Info aggiornamenti per %s non trovate."
 
 #: GithubPluginUpdater.py:532
 msgid "version: "
-msgstr "Version: "
+msgstr "Versione: "
 
 #: GithubPluginUpdater.py:533
 msgid ""
@@ -221,7 +222,7 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Soll das github-Update jetzt gestartet werden?"
+"Avviare l'aggiornamento github ora?"
 
 #: GithubPluginUpdater.py:553
 msgid ""
@@ -234,15 +235,15 @@ msgid ""
 "\n"
 "Should the github -Update start now?"
 msgstr ""
-"Warnhinweis:\n"
+"Attenzione:\n"
 "\n"
-"Plugin-Versionen im github sind oft noch Test-Versionen und können gewisse "
-"Probleme nach der Installation verursachen!\n"
+"Le versioni presenti su github sono spesso sperimentali e potrebbero "
+"provocare problemi dopo l'installazione.\n"
 "\n"
-"Daher sollten nur erfahrene User ein solches Update auf eine github-Version "
-"durchführen.\n"
+"Pertanto solo utenti esperti dovrebbero effettuare l'aggiornamento a una "
+"versione github.\n"
 "\n"
-"Soll das github-Update jetzt gestartet werden?"
+"Eseguire comunque l'aggiornamento github ora?"
 
 #: GithubPluginUpdater.py:574
 msgid ""
@@ -258,42 +259,42 @@ msgid ""
 "\n"
 " opkg install curl"
 msgstr ""
-"Das Update konnte nicht gestartet werden!\n"
+"Impossibile avviare l'aggiornamento.\n"
 "\n"
-"Es muss erst das curl-Paket installiert werden.\n"
+"È necessario preventivamente installare il pacchetto curl.\n"
 "\n"
-"Das curl-Paket kann im Plugin per Menü-Taste über den Eintrag 'curl-Paket auf "
-"der Box installieren' installiert werden!\n"
+"Il pacchetto curl può essere installato utilizzando la voce \"Installare il "
+"pacchetto curl\" raggiungibile con il tasto \"MENU\".\n"
 "\n"
 "\n"
-"per Telnet geht es z.B. mit folgendem Befehl:\n"
+"L'installazione è anche possibile via telnet con il seguente comando:\n"
 "\n"
-" opkg install curl"
+"opkg install curl"
 
 #: GithubPluginUpdater.py:658 GithubPluginUpdater.py:881
 #, python-format
 msgid "(remaining query-limit: %(limit)s, limit-reset-time: %(time)s)"
-msgstr "(Rest Abfrage-Limit: %(limit)s, Limit-Reset-Time: %(time)s)"
+msgstr "(numero query residue: %(limit)s - ora reset limite: %(time)s)"
 
 #: GithubPluginUpdater.py:689
 msgid "load github-versions ...\n"
-msgstr "lade github-Versionen ...\n"
+msgstr "Caricamento versione GitHub in corso...\n"
 
 #: GithubPluginUpdater.py:866
 msgid "github-versions loaded"
-msgstr "github-Versionen geladen"
+msgstr "Versione github caricata"
 
 #: GithubPluginUpdater.py:873
 msgid " - with error"
-msgstr " - mit Fehler"
+msgstr " - con errori"
 
 #: GithubPluginUpdater.py:876
 msgid " - updates avaible"
-msgstr " - Updates vorhanden"
+msgstr " - aggiornamenti disponibili"
 
 #: GithubPluginUpdater.py:878
 msgid " - no updates avaible"
-msgstr " - keine Updates vorhanden"
+msgstr " - aggiornamenti non disponibili"
 
 #: GithubPluginUpdater.py:890
 msgid ""
@@ -312,91 +313,92 @@ msgid ""
 "\n"
 "Afterwards all plugins should be displayed as current."
 msgstr ""
-"Es existieren nicht für alle Plugins lokale github-Datumswerte, die zum "
-"Versionsvergleich genutzt werden.\n"
-"Daher werden diese Plugins automatisch als Update angeboten. Es gibt folgende "
-"Möglichkeiten erstmals ein lokales github-Datum zu speichern:\n"
+"Non sono disponibili valori di date locali github per tutti i plugin in uso "
+"per un confronto delle versioni.\n"
+"Pertanto questi plugin sono offerti automaticamente come aggiornamento. Sono "
+"disponibili le seguenti opzioni per salvare una data locale di GitHub la "
+"prima volta :\n"
 "\n"
-"1. wenn alle Plugins auf der Box tatsächlich aktuell sind, dann kann per Menü-"
-"Taste die Option 'setze für alle Plugins das aktuelle github-Datum' gewählt "
-"werden\n"
+"1. Se tutti i plugin installati sono effettivamente aggiornati, il tasto "
+"\"MENU\" può essere utilizzato per selezionare l'opzione \"Impostare la data "
+"github corrente per tutti i plugin\"\n"
 "\n"
-"oder\n"
+"oppure\n"
 "\n"
-"2. die jeweiligen Plugins können per Farb-Taste aktualisiert werden.\n"
+"2. I rispettivi plugin possono essere aggiornati usando il tasto colorato.\n"
 "\n"
-"Danach sollten alle Plugins als aktuell angezeigt werden."
+"In seguito tutti i plugin dovrebbero essere visualizzati come correnti."
 
 #: GithubPluginUpdater.py:961
 msgid "setup"
-msgstr "Einstellungen"
+msgstr "Impostazioni"
 
 #: GithubPluginUpdater.py:964 GithubPluginUpdater.py:967
 msgid "force update for "
-msgstr "Erzwinge Update für "
+msgstr "Forzare l'aggiornamento per "
 
 #: GithubPluginUpdater.py:971
 msgid "set the current github date for all plugins"
-msgstr "setze für alle Plugins das aktuelle github-Datum"
+msgstr "Impostare la data github corrente per tutti i plugin"
 
 #: GithubPluginUpdater.py:972
 msgid "delete the current github date for all plugins"
-msgstr "lösche für alle Plugins das aktuelle github-Datum"
+msgstr "Rimuovere la data github corrente per tutti i plugin"
 
 #: GithubPluginUpdater.py:978
 msgid "install curl-package on the box"
-msgstr "curl-Paket auf der Box installieren"
+msgstr "Installare il pacchetto curl"
 
 #: GithubPluginUpdater.py:980
 msgid "remove curl-package from the box"
-msgstr "curl-Paket auf der Box deinstallieren"
+msgstr "Disinstallare il pacchetto curl"
 
 #: GithubPluginUpdater.py:983
 msgid "restore plugin backup"
-msgstr "Plugin-Backup wiederherstellen"
+msgstr "Ripristinare un backup dei plugin"
 
 #: GithubPluginUpdater.py:988
 msgid "menu GithubPluginUpdater"
-msgstr "Menü GithubPluginUpdater"
+msgstr "Menu GithubPluginUpdater"
 
 #: GithubPluginUpdater.py:1022
 msgid "Should the curl package be installed?"
-msgstr "Soll das curl-Paket installiert werden?"
+msgstr "Installare il pacchetto curl?"
 
 #: GithubPluginUpdater.py:1024
 msgid "Should the curl package be uninstalled?"
-msgstr "Soll das curl-Paket deinstalliert werden?"
+msgstr "Disinstallare il pacchetto curl?"
 
 #: GithubPluginUpdater.py:1027
 msgid "restore backup for GithubPluginUpdater"
-msgstr "Backup für GithubPluginUpdater wiederherstellen"
+msgstr "Ripristinare backup di GithubPluginUpdater"
 
 #: GithubPluginUpdater.py:1030
 #, python-format
 msgid "restore backup for %s"
-msgstr "Backup für %s wiederherstellen"
+msgstr "Rirpistinare backup per %s"
 
 #: GithubPluginUpdater.py:1033
 msgid "menu restore plugin backup"
-msgstr "Menü Plugin-Backup wiederherstellen"
+msgstr "Menu ripristino backup plugin"
 
 #: GithubPluginUpdater.py:1035
 msgid ""
 "none of the possible plugins are installed on the box.\n"
 "a backup restore is therefore not possible."
 msgstr ""
-"keines der möglichen Plugins ist auf der Box installiert.\n"
-"Eine Backup-Wiederherstellung ist dadurch nicht möglich."
+"Nessuno dei plugin previsti risulta installato.\n"
+"Un ripristino dal backup è pertanto impossibile."
 
 #: GithubPluginUpdater.py:1075
 #, python-format
 msgid "select backup for the plugin '%s'"
-msgstr "Backup für das Plugin '%s' auswählen"
+msgstr "Selezionare il backup per il plugin \"%s\""
 
 #: GithubPluginUpdater.py:1077
 #, python-format
 msgid "no backups found for the plugin '%s'."
-msgstr "keine Backups für das Plugins '%s' gefunden."
+msgstr "Nessun backup trovato per \"%s\"."
 
 #: GithubPluginUpdater.py:1085
 #, python-format
@@ -405,8 +407,7 @@ msgid ""
 "\n"
 "backup:\n"
 msgstr ""
-"Soll das nachfolgende Backup für das Plugin '%s' wirklich wiederhergestellt "
-"werden?\n"
+"Ripristinare il backup successivo per il plugin \"%s\"?\n"
 "\n"
 "Backup:\n"
 
@@ -418,39 +419,38 @@ msgid ""
 "Maybe not all plugin files are in the following backup folder:\n"
 "\n"
 msgstr ""
-"Die Backup-Wiederherstellung für das Plugin '%s' ist fehlgeschlagen\n"
+"Ripristino del backup per il plugin \"%s\" fallito.\n"
 "\n"
-"Möglicherweise befinden sich nicht alle Plugin-Dateien im nachfolgenden "
-"Backup-Ordner:\n"
+"Forse non tutti i file dei plugin sono nella seguente directory di backup:\n"
 "\n"
 
 #: GithubPluginUpdater.py:1106
 msgid "restore backup for the plugin -"
-msgstr "Backup-Wiederherstellung für das Plugin -"
+msgstr "Ripristino in corso del backup del plugin -"
 
 #: GithubPluginUpdater.py:1109
 msgid "installed version before restore backup:"
-msgstr "installierte Version vor der Backup-Wiederherstellung:"
+msgstr "Versione installata prima del ripristino backup:"
 
 #: GithubPluginUpdater.py:1110
 msgid "copy backup files ......"
-msgstr "kopiere Backup-Dateien ......"
+msgstr "Copia file di backup in corso..."
 
 #: GithubPluginUpdater.py:1113
 msgid "copy SerienRecorder database ......"
-msgstr "kopiere SerienRecorder-Datenbank ......"
+msgstr "Copia del database di SerienRecorder in corso..."
 
 #: GithubPluginUpdater.py:1119
 msgid "installed version after restore backup:"
-msgstr "installierte Version nach der Backup-Wiederherstellung:"
+msgstr "Versione installata dopo il ripristino backup:"
 
 #: GithubPluginUpdater.py:1147
 msgid ""
 "Plugins have been updated!\n"
 "Do you want to restart the GUI now?"
 msgstr ""
-"Es wurden Plugins aktualisiert!\n"
-"Soll jetzt ein GUI-Neustart durchgeführt werden?"
+"Plugin aggiornato.\n"
+"Riavviare la GUI ora?"
 
 #: GithubPluginUpdater.py:1184
 msgid ""
@@ -458,15 +458,15 @@ msgid ""
 "  installed version before update:"
 msgstr ""
 "\n"
-"  installierte Version vor dem Update:"
+"  Versione installata prima dell'aggiornamento:"
 
 #: GithubPluginUpdater.py:1193
 msgid "backup local version to:"
-msgstr "sichere lokale Version in:"
+msgstr "Backup della versione locale in:"
 
 #: GithubPluginUpdater.py:1196
 msgid "backup SerienRecorder database ......"
-msgstr "sichere SerienRecorder Datenbank ......"
+msgstr "Backup del database di SerienRecorder in corso..."
 
 #: GithubPluginUpdater.py:1201
 msgid ""
@@ -474,7 +474,7 @@ msgid ""
 "  load current version from github......"
 msgstr ""
 "\n"
-"  lade aktuelle Version von Github......"
+"Caricamento versione corrente da github in corso..."
 
 #: GithubPluginUpdater.py:1208
 msgid ""
@@ -482,7 +482,7 @@ msgid ""
 "  install current github version......"
 msgstr ""
 "\n"
-"  installiere aktuelle Github-Version......"
+"Installazione versione github corrente in corso..."
 
 #: GithubPluginUpdater.py:1216
 msgid ""
@@ -490,11 +490,11 @@ msgid ""
 "  installed version after update:"
 msgstr ""
 "\n"
-"  installierte Version nach dem Update:"
+"  Versione installata dopo l'aggiornamento:"
 
 #: GithubPluginUpdater.py:1237
 msgid "GithubPluginUpdater - update info"
-msgstr "GithubPluginUpdater - Updateinfo"
+msgstr "GithubPluginUpdater - Info aggiornamenti"
 
 #: GithubPluginUpdater.py:1246
 #, python-format
@@ -511,11 +511,11 @@ msgstr ""
 "\n"
 " = GithubPluginUpdater = \n"
 "\n"
-"  >>> es liegen für folgende Plugins Updates vor !!! <<<\n"
+"  >>> Sono presenti aggiornamenti per i seguenti plugin <<<\n"
 "  %s\n"
 "\n"
 "\n"
-"Soll der GithubPluginUpdater geöffnet werden?"
+"Aprire GithubPluginUpdater?"
 
 #: GithubPluginUpdater.py:1324 GithubPluginUpdater.py:1354
 msgid ""
@@ -523,9 +523,9 @@ msgid ""
 "\n"
 "github update info could not be determined."
 msgstr ""
-"Error\n"
+"Errore\n"
 "\n"
-"Es konnte keine github-Update-Info ermittelt werden."
+"Impossibile determinare informazioni di aggiornamento github."
 
 #: GithubPluginUpdater.py:1382
 msgid ""
@@ -534,8 +534,8 @@ msgid ""
 "The hourly limit for github queries was reached!!\n"
 msgstr ""
 "\n"
-"Die erweiterte Update-Info konnte nicht geladen werden.\n"
-"Das stündliche Limit für github-Abfragen wurde erreicht!!\n"
+"Impossibile caricare info avanzate.\n"
+"Raggiunto il limite orario per le query su github.\n"
 
 #: GithubPluginUpdater.py:1383
 msgid ""
@@ -543,7 +543,7 @@ msgid ""
 "query limit per hour:\t  "
 msgstr ""
 "\n"
-"Abfrage-Limit pro Stunde:\t  "
+"Limite query per ora:\t"
 
 #: GithubPluginUpdater.py:1384
 msgid ""
@@ -551,7 +551,7 @@ msgid ""
 "remaining query limit:\t  "
 msgstr ""
 "\n"
-"Restliches Abfrage-Limit:\t  "
+"Limite query residuo:\t"
 
 #: GithubPluginUpdater.py:1385
 msgid ""
@@ -559,7 +559,7 @@ msgid ""
 "limit reset time: \t  "
 msgstr ""
 "\n"
-"Limit-Reset-Zeit: \t  "
+"Ora reset del limite: \t  "
 
 #: GithubPluginUpdater.py:1386
 msgid ""
@@ -567,7 +567,7 @@ msgid ""
 "current time:     \t  "
 msgstr ""
 "\n"
-"aktuelle Zeit:     \t  "
+"Ora corrente:     \t  "
 
 #: GithubPluginUpdater.py:1387
 msgid ""
@@ -575,7 +575,7 @@ msgid ""
 "waiting to reset: \t  "
 msgstr ""
 "\n"
-"Wartezeit bis Reset: \t  "
+"In attesa di reset: \t  "
 
 #: GithubPluginUpdater.py:1387
 msgid " min"
@@ -591,11 +591,11 @@ msgstr ""
 "\n"
 "\n"
 "\n"
-"Exit-Taste zum Beenden"
+"Tasto \"EXIT\" per chiudere"
 
 #: GithubPluginUpdater.py:1408
 msgid "No github update info could be determined."
-msgstr "Es konnte keine github-Update-Info ermittelt werden."
+msgstr "Impossibile determinare informazioni di aggiornamento su github."
 
 #: GithubPluginUpdater.py:1419
 msgid ""
@@ -603,13 +603,13 @@ msgid ""
 "\n"
 "No github update info could be determined."
 msgstr ""
-"Error\n"
+"Errore.\n"
 "\n"
-"Es konnte keine github-Update-Info ermittelt werden."
+"Impossibile determinare informazioni di aggiornamento su github."
 
 #: GithubPluginUpdater.py:1425
 msgid "show update info"
-msgstr "Show Update-Info"
+msgstr "Mostrare info aggiornamento"
 
 #: GithubPluginUpdater.py:1426
 msgid ""
@@ -617,7 +617,7 @@ msgid ""
 "loading update info...\n"
 msgstr ""
 "\n"
-"Lade Update-Info...\n"
+"Caricamento info aggiornamento in corso...\n"
 
 #: GithubPluginUpdater.py:1426
 msgid ""
@@ -627,19 +627,19 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Exit-Taste zum Abbrechen"
+"Tasto \"EXIT\" per annullare"
 
 #: GithubPluginUpdaterMessage.py:6
 msgid "Message"
-msgstr ""
+msgstr "Messaggio"
 
 #: GithubPluginUpdaterMessage.py:13
 msgid "Input"
-msgstr ""
+msgstr "Input"
 
 #: GithubPluginUpdater_Setup.py:75
 msgid "GithubPluginUpdater Setup "
-msgstr "GithubPluginUpdater Setup "
+msgstr "Impostazioni GithubPluginUpdater "
 
 #: GithubPluginUpdater_Setup.py:94
 msgid "OK"
@@ -647,15 +647,15 @@ msgstr "OK"
 
 #: GithubPluginUpdater_Setup.py:95
 msgid "Cancel"
-msgstr "Abbrechen"
+msgstr "Annullare"
 
 #: GithubPluginUpdater_Setup.py:96
 msgid "Update-Info"
-msgstr "Update-Info"
+msgstr "Info aggiornamento"
 
 #: GithubPluginUpdater_Setup.py:116
 msgid "Updatecheck and Info on starting the box"
-msgstr "Updatecheck und Info beim Start der Box"
+msgstr "Verificare aggiornamenti e info all'avvio del box"
 
 #: GithubPluginUpdater_Setup.py:116
 msgid ""
@@ -663,74 +663,72 @@ msgid ""
 "show a message (none/only on updates/always). On 'always' show a message also "
 "if is not updates avaible."
 msgstr ""
-"Prüft beim Box-Start (auch GUI-Neustart und Start aus dem Idle) auf Updates "
-"und gibt eine Meldung aus (nein/nur bei Updates/immer). Bei 'immer' kommt "
-"auch eine Info-Meldung, dass kein Update verfügbar ist."
+"Verificare ad ogni avvio (compresi riavvi GUI e risvegli da idle) la presenza "
+"di aggiornamenti e mostrare un messaggio (mai/solo su aggiornamenti/sempre). "
+"Sempre mostrerà un messaggio anche in assenza di aggiornamenti."
 
 #: GithubPluginUpdater_Setup.py:119
 msgid "   interval of AutoUpdateCheck on boxstart"
-msgstr "   Intervall für AutoUpdateCheck beim Start der Box"
+msgstr "   Intervallo di AutoUpdateCheck su avvio box"
 
 #: GithubPluginUpdater_Setup.py:119
 msgid ""
 "set the check-interval of AutoUpdateCheck on boxstart. Within the interval "
 "there is no renewed update check when the box is started."
 msgstr ""
-"Legt den Prüf-Intervall für den AutoUpdateCheck beim Start der Box fest. "
-"Innerhalb des Intervalls erfolgt kein erneuter Update-Check beim Start der "
-"Box."
+"Impostare l'intervallo verifiche di AutoUpdateCheck all'avvio. Durante questo "
+"intervallo non verranno ripetute verifiche sugli aggiornamenti."
 
 #: GithubPluginUpdater_Setup.py:121
 msgid "   duration of update-info-window (in seconds)"
-msgstr "   Anzeigedauer für Update-Info-Fenster (in Sek)"
+msgstr "   Durata finestra info aggiornamenti (secondi)"
 
 #: GithubPluginUpdater_Setup.py:121
 msgid ""
 "set after how many seconds the update-info-window is closed (1-20 seconds, 0 "
 "= wait for key-press)"
 msgstr ""
-"Legt fest, nach wieviel Sekunden das Update-Info-Fenster automatisch "
-"geschlossen wird (1-20 Sek., 0 = wartet auf Tastendruck)"
+"Impostare il ritardo della chiusura automatica della finestra info "
+"aggiornamenti (1-20 secondi - 0 = attendere pressione tasto)"
 
 #: GithubPluginUpdater_Setup.py:123
 msgid "   advanced update-info with question to open the plugin"
-msgstr "   erweiterte Update-Info mit Frage zum Öffnen des Plugins"
+msgstr "   Info aggiornamento avanzate con richiesta di aprire il plugin"
 
 #: GithubPluginUpdater_Setup.py:123
 msgid ""
 "show on update-info an additioal question, if you want to open directly the "
 "GithubPluginUpdater."
 msgstr ""
-"Zeigt beim Update-Hinweis zusätzlich eine Frage, ob man den "
-"GithubPluginUpdater direkt direkt öffnen möchte."
+"Mostrare su info aggiornamenti una richiesta aggiuntiva per aprire "
+"direttamente GithubPluginUpdater."
 
 #: GithubPluginUpdater_Setup.py:126
 msgid "       answer for question is default set to:"
-msgstr "       Antwort für Frage steht standardmäßig auf:"
+msgstr "       Risposta predefinita alla richiesta:"
 
 #: GithubPluginUpdater_Setup.py:126
 msgid ""
 "set the default answer to the question to open the GithubPluginUpdaters. on "
 "'no' the plugin is not open automaically on timeout of the question."
 msgstr ""
-"Legt fest, welche Antwort für die Frage zum Öffnen des GithubPluginUpdaters "
-"standardmäßig vorausgewählt sein soll. Bei 'nein' öffnet sich das Plugin bei "
-"Zeitablauf der Frage nicht automatisch."
+"Impostare la risposta predefinita alla richiesta di apertura di "
+"GithubPluginUpdaters. \"No\" non aprirà automaticamente il plugin al timeout "
+"della richiesta."
 
 #: GithubPluginUpdater_Setup.py:129 GithubPluginUpdater_Setup.py:132
 #, python-format
 msgid "   update-check for %s on boxstart"
-msgstr "   Update-Check für %s bei Box-Start"
+msgstr "   Verificare aggiornamenti per %s all'avvio del box"
 
 #: GithubPluginUpdater_Setup.py:129 GithubPluginUpdater_Setup.py:132
 msgid "set if you want to check for updates for this plugin on box-start."
 msgstr ""
-"Legt fest, ob für das Plugin beim Box-Start eine Update-Prüfung durchgeführt "
-"werden soll."
+"Impostare una verifica aggiornamenti per questo plugin all'avvio del box."
 
 #: GithubPluginUpdater_Setup.py:134
 msgid "option to check for github-updates / alternative"
-msgstr "Variante zum Prüfen auf github-Updates / Alternative"
+msgstr "Opzioni per la verifica di aggiornamenti github/alternative"
 
 #: GithubPluginUpdater_Setup.py:134
 msgid ""
@@ -738,138 +736,122 @@ msgid ""
 "'api call', which has an access restriction of 60 calls per hour. A relapse "
 "alternative can be chosen at api."
 msgstr ""
-"Es gibt 3 Varianten zur Update-Prüfung. Am zuverlässigstens ist die Variante "
-"'api-Abruf', welche eine Zugriffsbeschränkung von 60 Abrufen pro Stunde hat. "
-"Bei api kann eine Rückfall-Alternative gewählt werden."
+"Sono disponibili 3 opzioni di verifica aggiornamenti. L'opzione più "
+"affidabile è la \"api-call\", con una restrizione di accesso a 60 chiamate/"
+"ora. Con le api, è possibile selezionare un'alternativa di ripiego."
 
 #: GithubPluginUpdater_Setup.py:135
 msgid "check only the src-folder"
-msgstr "Prüfe nur den src-Ordner"
+msgstr "Verificare solo la directory src"
 
 #: GithubPluginUpdater_Setup.py:135
 msgid ""
 "Checks only the src folder for an update. Irrelevant updates outside of this "
 "folder are ignored, since only the src folder is updated anyway."
 msgstr ""
-"Prüft nur den src-Ordner auf ein Update. Dabei werden unrelevante Updates "
-"außerhalb dieses Ordners ignoriert, da eh nur der src-Ordner geupdatet wird."
+"Verificare solo la directory src per gli aggiornamenti. Gli aggiornamenti "
+"irrilevanti al di fuori di questa directory verranno ignorati, poiché in ogni "
+"caso solo la cartella src sarà aggiornata."
 
 #: GithubPluginUpdater_Setup.py:136
 msgid "show warning before a github update"
-msgstr "Warnhinweis vor einem github-Update anzeigen"
+msgstr "Mostrare un avviso prima di un aggiornamento github"
 
 #: GithubPluginUpdater_Setup.py:136
 msgid ""
 "The warning before a github update on the possible consequences of such an "
 "update can be activated or deactivated here."
 msgstr ""
-"Der Warnhinweis vor einem github-Update zu den möglichen Folgen eines solchen "
-"Updates kann hier aktiviert bzw. deaktiviert werden."
+"Qui è possibile attivare/disattivare un avviso prima di aggiornamenti github "
+"sulle possibili conseguenze di tali operazioni."
 
 #: GithubPluginUpdater_Setup.py:137
 msgid "create a backup of the plugin before update"
-msgstr "erzeuge ein Backup des Plugins vor dem Update"
+msgstr "Creare un backup del plugin prima di aggiornare"
 
 #: GithubPluginUpdater_Setup.py:137
 msgid "create a backup from the local plugin before update the guthub-version."
 msgstr ""
-"Legt vor dem Update der Github-Version ein Backup des lokalen Plugins an."
+"Creare un backup del plugin locale prima di aggiornarlo con la versione "
+"github."
 
 #: GithubPluginUpdater_Setup.py:139
 msgid "   storage location for the plugin backup"
-msgstr "   Speicherort für das Plugin-Backup"
+msgstr "   Posizione di archiviazione dei backup dei plugin"
 
 #: GithubPluginUpdater_Setup.py:139
 msgid ""
 "Defines the location for the plugin backup (selection with OK). The path is "
 "supplemented by the local plugin version number and date/time."
 msgstr ""
-"Legt den Ort für das Plugin-Backup fest (Auswahl mit OK). Der Pfad wird noch "
-"durch die lokale Plugin-Versionsnummer und Datum/Zeit ergänzt."
+"Definire la posizione dei backup dei plugin (\"OK\" per selezionare). Il "
+"percorso verrà completato con il numero di versione locale del plugin e data/"
+"ora."
 
 #: GithubPluginUpdater_Setup.py:153
 msgid "Choose Directory:"
-msgstr "wähle das Verzeichnis:"
+msgstr "Selezionare la directory:"
 
 #: GithubPluginUpdater_Setup.py:154
 msgid "Choose directory"
-msgstr "wähle das Verzeichnis"
+msgstr "Selezionare la directory"
 
 #: __init__.py:29 __init__.py:34 __init__.py:35
 msgid "no"
-msgstr "nein"
+msgstr "No"
 
 #: __init__.py:29
 msgid "Info only on updates"
-msgstr "Info nur bei Updates"
+msgstr "Info solo sugli aggiornamenti"
 
 #: __init__.py:29 __init__.py:40
 msgid "always"
-msgstr "immer"
+msgstr "Sempre"
 
 #: __init__.py:34 __init__.py:35
 msgid "yes"
-msgstr "ja"
+msgstr "Sì"
 
 #: __init__.py:37
 msgid "normal website"
-msgstr "normale Website"
+msgstr "Sito web standard"
 
 #: __init__.py:37
 msgid "commits-list"
-msgstr "commits-Liste"
+msgstr "Elenco commit"
 
 #: __init__.py:37
 msgid "api-call / normal website"
-msgstr "api-Abruf / normale Website"
+msgstr "api-call/Sito web standard"
 
 #: __init__.py:37
 msgid "api-call / commits-list"
-msgstr "api-Abruf / commits-Liste"
+msgstr "api-call/Elenco commit"
 
 #: __init__.py:41
 msgid "hourly"
-msgstr "stündlich"
+msgstr "Ogni ora"
 
 #: __init__.py:42
 msgid "every 6 hours"
-msgstr "alle 6 Stunden"
+msgstr "Ogni 6 ore"
 
 #: __init__.py:43
 msgid "every 12 hours"
-msgstr "alle 12 Stunden"
+msgstr "Ogni 12 ore"
 
 #: __init__.py:44
 msgid "daily"
-msgstr "täglich"
+msgstr "Giornaliera"
 
 #: __init__.py:45
 msgid "weekly"
-msgstr "wöchentlich"
+msgstr "Settimanale"
 
 #: __init__.py:46
 msgid "monthly"
-msgstr "monatlich"
+msgstr "Mensile"
 
 #: plugin.py:152 plugin.py:153
 msgid "update github-versions"
-msgstr "github-Versionen updaten"
-
-#, fuzzy
-#~| msgid ""
-#~| "Error\n"
-#~| "\n"
-#~| "github update info could not be determined."
-#~ msgid ""
-#~ "Error\n"
-#~ "\n"
-#~ "Github update info could not be determined."
-#~ msgstr ""
-#~ "Error\n"
-#~ "\n"
-#~ "Es konnte keine github-Update-Info ermittelt werden."
-
-#, fuzzy
-#~| msgid "backup SerienRecorder database ......"
-#~ msgid "kopiere SerienRecorder-Datenbank ......"
-#~ msgstr "sichere SerienRecorder Datenbank ......"
+msgstr "Aggiornare la versione github"
